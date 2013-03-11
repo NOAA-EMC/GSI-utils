@@ -2,48 +2,14 @@ SHELL=/bin/sh
 
 #==============================================================================
 #
-# GSI Makefile
+# stats Makefile
 #
-# <Usage>
-#   0) Export this makefile name to a variable 'MAKE_FILE' as 
-#       export MAKE_FILE = makefile
-#      If this file is named neither 'makefile' nor 'Makefile' but 
-#      'makeairs' for instance, then call this makefile by typing
-#      'make -f makeairs' instead of 'make'.
-#
-#  0a) Modify the include link to either use compile.config.ibm
-#      or compile.config.sgi for compilation on the ibm sp or sgi
-#
-#   1) To make a GSI executable file, type
-#         > make  or  > make all
-#
-#   2) To make a GSI executable file with debug options, type
-#         > make debug
-#
-#   3) To copy the GSI load module to installing directory, type
-#         > make install
-#      . Specify the directory to a variable 'INSTALL_DIR' below.
-#
-#   4) To crean up files created by make, type
-#         > make clean
-#
-#   5) To create a library, libgsi.a, in the lib directory, type
-#         > make library
-#
-#
-# Created by Y.Tahara in May,2002
-# Edited by D.Kleist Oct. 2003
-#==============================================================================
-
 #-----------------------------------------------------------------------------
 #                          -- Parent make (calls child make) --
 #-----------------------------------------------------------------------------
-
-# -----------------------------------------------------------
 # Default configuration, possibily redefined in Makefile.conf
 # -----------------------------------------------------------
 
-ARCH	 = `uname -s`
 SED      = sed
 DASPERL  = /usr/bin/perl
 COREROOT = ../../..
@@ -52,62 +18,27 @@ CORELIB  = $(COREROOT)/lib
 COREINC  = $(COREROOT)/include
 COREETC  = $(COREROOT)/etc
 
-
 # -------------
 # General Rules
 # -------------
 
-CP              = /bin/cp -p
-RM              = /bin/rm -f
-MKDIR           = /bin/mkdir -p
-AR              = ar cq
-PROTEX          = protex -f # -l
-ProTexMake      = protex -S # -l
-LATEX           = pdflatex
-DVIPS           = dvips
-
-# Preprocessing
-# -------------
-_DDEBUG =
-_D      = $(_DDEBUG)
+CP      = /bin/cp -p
+MKDIR   = /bin/mkdir -p
 
 # ---------
 # Libraries
 # ---------
-LIBmpeu   = -L$(CORELIB) -lmpeu
-LIBbfr    = -L$(CORELIB) -lbfr
-LIBw3     = -L$(CORELIB) -lw3
-LIBsp     = -L$(CORELIB) -lsp
-LIBbacio  = -L$(CORELIB) -lbacio
-LIBsfcio  = -L$(CORELIB) -lsfcio
-LIBsigio  = -L$(CORELIB) -lsigio
-LIBcrtm   = -L$(CORELIB) -lcrtm_2.0.5
-LIBtransf = -L$(CORELIB) -ltransf
-LIBhermes = -L$(CORELIB) -lhermes
-LIBgfio   = -L$(CORELIB) -lgfio
-
-# --------------------------
-# Default Baselibs Libraries
-# --------------------------
-INChdf          = -I$(BASEDIR)/$(ARCH)/include/hdf
-LIBhdf          = -L$(BASEDIR)/$(ARCH)/lib  -lmfhdf -ldf -lhdfjpeg -lhdfz -lsz
-LIBnetcdf       = -L$(BASEDIR)/$(ARCH)/lib -lnetcdf
-LIBwrf          = -L$(BASEDIR)/$(ARCH)/lib -lwrflib
-LIBwrfio_int    = -L$(BASEDIR)/$(ARCH)/lib -lwrfio_int
-LIBwrfio_netcdf = -L$(BASEDIR)/$(ARCH)/lib -lwrfio_nf
-
-# ------------------------
-# Default System Libraries
-# ------------------------
-LIBmpi          = -lmpi
-LIBsys          = 
-
+LIBgsi = $(CORELIB)/libgsi.a
+LIBsp  = $(CORELIB)/libsp.a
+LIBw3  = $(CORELIB)/libw3.a
+LIBbacio = $(CORELIB)/libbacio.a
+LIBmpi = -lmpi
 
 #------------
-# Include machine dependent compile & load options
+# need to know what compiling options to use
 #------------
-  MAKE_CONF = Makefile.conf
-include $(MAKE_CONF)
+
+include Makefile.conf.zeus
 
 
 # -------------
@@ -121,7 +52,7 @@ include $(MAKE_CONF)
 # Load module
 # -----------
 
-  EXE_FILE = global_angupdate
+  EXE_FILE = calcstats.exe
 
 
 # --------------------
@@ -174,9 +105,7 @@ install:
 clean:
 	@echo
 	@echo '==== CLEAN ==================================================='
-	- $(RM) $(EXE_FILE) *.o *.mod *.MOD *.lst *.a *.x
-	- $(RM) loadmap.txt log.make.$(EXE_FILE)
-	- $(MAKE) -f ${MAKE_FILE} doclean
+	- rm -f $(EXE_FILE) *.o *.mod *.MOD *.lst
 
 
 #-----------------------------------------------------------------------------
@@ -187,15 +116,39 @@ clean:
 # Source files
 # ------------
 
-  SRCSF90C = main.F90 kinds.F90 read_diag.f90 determine_time_levels.f90
+  SRCSF90C = \
+    balprojs.f90 \
+    biascor.f90 \
+    comm_mod.f90 \
+    delvars.f90 \
+    deter_subdomain.f90 \
+    genqsat.f90 \
+    getcases.f90 \
+    grdsphdp.f90 \
+    horizsc.f90 \
+    init_commvars.f90 \
+    initvars.f90 \
+    isrchfge.f90 \
+    kinds.f90 \
+    mat.f90 \
+    postmod.f90 \
+    readpairs.f90 \
+    smoothz.f90 \
+    smooth2d.f90 \
+    specgrid.f90 \
+    sstmod.f90 \
+    statsmain.f90 \
+    variables.f90 \
+    variances.f90 \
+    variances3d.f90 \
+    vertsc.f90 \
 
   SRCSF77 =
 
-  SRCSC = 
+  SRCSC =
 
   SRCS = $(SRCSF90C) $(SRCSF77) $(SRCSC)
 
-  DOCSRCS = *.f90 *.F90
 
 # ------------
 # Object files
@@ -210,39 +163,64 @@ clean:
 # Default compiling rules
 # -----------------------
 
-.SUFFIXES :
-.SUFFIXES : .F90 .f90 .f .c .o
+.SUFFIXES : .F90 .f90 .f .c
 
 .F90.o  :
 	@echo
 	@echo '---> Compiling $<'
-	$(CF) $(FFLAGS) $(_D) -c $<
+	$(CF) $(FFLAGS) -c $<
 
 .f90.o  :
 	@echo
 	@echo '---> Compiling $<'
 	$(CF) $(FFLAGS) -c $<
 
-.f.o  :
-	@echo
-	@echo '---> Compiling $<'
-	$(CF) $(FFLAGS_f) -c $<
-
 .c.o  :
 	@echo
 	@echo '---> Compiling $<'
 	$(CC) $(CFLAGS) -c $<
 
+
 # ------------
 # Dependencies
 # ------------
-  MAKE_DEPEND = Makefile.dependency
-include $(MAKE_DEPEND)
+
+balprojs.o : postmod.o kinds.o variables.o
+biascor.o: variables.o kinds.o
+comm_mod.o: kinds.o variables.o
+delvars.o: kinds.o variables.o
+deter_subdomain.o: kinds.o variables.o
+genqsat.o: kinds.o variables.o
+getcases.o: kinds.o variables.o
+grdsphdp.o: kinds.o variables.o
+horizsc.o: kinds.o variables.o comm_mod.o specgrid.o
+init_commvars.o: kinds.o comm_mod.o variables.o
+initvars.o: kinds.o specgrid.o variables.o 
+isrchfge.o: kinds.o
+linbal.o : kinds.o variables.o specgrid.o
+mat.o: 
+postmod.o: sstmod.o kinds.o variables.o
+readpairs.o: kinds.o specgrid.o comm_mod.o variables.o
+smoothz.o:
+smooth2d.o: kinds.o variables.o
+specgrid.o: kinds.o variables.o
+sstmod.o: kinds.o variables.o
+statsmain.o: postmod.o specgrid.o comm_mod.o kinds.o variables.o
+kinds.o:
+variables.o: kinds.o
+variances.o: postmod.o kinds.o variables.o
+variances3d.o: postmod.o kinds.o variables.o
+vertsc.o: postmod.o kinds.o variables.o
 
 # ----
+# Link
+# ----
 
-$(EXE_FILE) :  $(OBJS) 
+$(EXE_FILE) : $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+calcstats.x: $(EXE_FILE)
+	mv $(EXE_FILE) $@
 
 
 # ------------------------
@@ -263,7 +241,7 @@ all :
 		"LIBS=$(LIBS_N)" "LDFLAGS=$(LDFLAGS_N)" \
 		$(EXE_FILE)
 
-library :
+single :
 	@$(MAKE) -f $(MAKE_FILE) "COMP_MODE=$@" check_mode
 	@echo
 	@echo '==== COMPILE ================================================='
@@ -272,9 +250,24 @@ library :
 		"CFLAGS=$(CFLAGS_N)" \
 		$(OBJS)
 	@echo
-	@echo '==== CREATING LIBRARY ========================================'
-	$(MAKE) lib
-	mv $(LIB) ../lib
+	@echo '==== LINK ===================================================='
+	@$(MAKE) -f $(MAKE_FILE) \
+		"LIBS=$(LIBS_N)" "LDFLAGS=$(LDFLAGS_N)" \
+		$(EXE_FILE)
+
+double :
+	@$(MAKE) -f $(MAKE_FILE) "COMP_MODE=$@" check_mode
+	@echo
+	@echo '==== COMPILE ================================================='
+	@$(MAKE) -f $(MAKE_FILE) \
+		"FFLAGS=$(FFLAGS_N8)" \
+		"CFLAGS=$(CFLAGS_N)" \
+		$(OBJS)
+	@echo
+	@echo '==== LINK ===================================================='
+	@$(MAKE) -f $(MAKE_FILE) \
+		"LIBS=$(LIBS_N8)" "LDFLAGS=$(LDFLAGS_N)" \
+		$(EXE_FILE)
 
 debug :
 	@$(MAKE) -f $(MAKE_FILE) "COMP_MODE=$@" check_mode
@@ -287,7 +280,7 @@ debug :
 	@echo
 	@echo '==== LINK ===================================================='
 	@$(MAKE) -f $(MAKE_FILE) \
-		"LIBS=$(LIBS_D)" "LDFLAGS=$(LDFLAGS_D)" \
+		"LIBS=$(LIBS_D)" "LDFLAGS=$(LDFLAGS_N)" \
 		$(EXE_FILE)
 
 check_mode :
@@ -295,15 +288,21 @@ check_mode :
 	  if [ '$(COMP_MODE)' != `head -n 1 $(LOG_FILE)` ]; then \
 	    echo ;\
 	    echo "### COMPILE MODE WAS CHANGED ###" ;\
-	    $(MAKE) -f $(MAKE_FILE) clean ;\
+	    make clean ;\
 	  fi ;\
 	else \
 	  echo ;\
 	  echo "### NO LOG FILE ###" ;\
-	  $(MAKE) -f $(MAKE_FILE) clean ;\
+	  make clean ;\
 	fi
 	@echo $(COMP_MODE) > $(LOG_FILE)
 
-doclean:
-	- $(RM) *.tex *.dvi *.aux *.toc *.log *.ps *.pdf
+# -------------------------
+# GMAO Nomenclature/targets
+# -------------------------
+
+export: $(EXE_FILE)
+	$(MKDIR)                  $(COREBIN)
+	$(CP) $(EXE_FILE)         $(COREBIN)/calcstats.x
+	$(CP) stats.parm.sample   $(COREETC)/stats.parm
 
