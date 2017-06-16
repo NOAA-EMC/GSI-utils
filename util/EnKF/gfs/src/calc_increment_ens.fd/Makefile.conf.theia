@@ -7,19 +7,14 @@
 
 BACIO_VER = 2.0.1
 NEMSIO_VER = 2.2.1
-SIGIO_VER = 2.0.1
-SP_VER = 2.0.2
 W3NCO_VER = 2.0.6
 
 CORELIB  = /scratch3/NCEPDEV/nwprod/lib
 
-SIGIO_INC4 = $(CORELIB)/sigio/v$(SIGIO_VER)/incmod/sigio_v$(SIGIO_VER)_4
 NEMSIO_INC= $(CORELIB)/nemsio/v$(NEMSIO_VER)/incmod/nemsio_v$(NEMSIO_VER)
 
 BACIO_LIB4=$(CORELIB)/bacio/v$(BACIO_VER)/libbacio_v$(BACIO_VER)_4.a
 NEMSIO_LIB=$(CORELIB)/nemsio/v$(NEMSIO_VER)/libnemsio_v$(NEMSIO_VER).a
-SIGIO_LIB4=$(CORELIB)/sigio/v$(SIGIO_VER)/libsigio_v$(SIGIO_VER)_4.a
-SP_LIB4=$(CORELIB)/sp/v$(SP_VER)/libsp_v$(SP_VER)_4.a
 W3NCO_LIB4=$(CORELIB)/w3nco/v$(W3NCO_VER)/libw3nco_v$(W3NCO_VER)_4.a
 
 NETCDF_INC=$(NETCDF)/include
@@ -40,7 +35,7 @@ NETCDF_LIB=-L$(NETCDF)/lib -lnetcdf
   
   OMP = -openmp
 
-  FFLAGS_INC    = -I $(SIGIO_INC4) -I $(NEMSIO_INC) -I $(NETCDF_INC)
+  FFLAGS_INC    = -I $(NEMSIO_INC) -I $(NETCDF_INC)
 
   FFLAGS_F90    = -convert big_endian -assume byterecl \
 				  -implicitnone -traceback
@@ -80,7 +75,7 @@ NETCDF_LIB=-L$(NETCDF)/lib -lnetcdf
 
 #--- Normal mode options
 
-  LIBS_N        = $(NEMSIO_LIB) $(BACIO_LIB4) $(SIGIO_LIB4) $(W3NCO_LIB4) $(SP_LIB4) $(NETCDF_LIB)
+  LIBS_N        = $(NEMSIO_LIB) $(BACIO_LIB4) $(W3NCO_LIB4) $(NETCDF_LIB)
 
   LDFLAGS_N     = -Wl,-Map,loadmap.txt $(OMP)
 

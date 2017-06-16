@@ -2,47 +2,54 @@
 # of the GSI code on the NOAA HPCS.
 
 # ----------------------------------
-# Redefine variables for NOAA HPCS
+# Define derived variables
 # ----------------------------------
-COREINC  = /scratch1/portfolios/NCEPDEV/da/save/Michael.Lueken/nwprod/incmod
-CORELIB  = /scratch1/portfolios/NCEPDEV/da/save/Michael.Lueken/nwprod/lib
-INCsfcio = $(COREINC)/sfcio_4
+
+NETCDFPATH = $(NETCDF)
+NETCDF_INCLUDE = $(NETCDFPATH)/include
+NETCDF_LDFLAGS_F = -L$(NETCDFPATH)/lib -lnetcdf
+
 
 # ---------------------------
 # General targets/definitions
 # ---------------------------
 
-  AR     = ar -v
+  AR     = ar -rv
 
 # ----------------------------
 # Fortran compiler and options
 # ----------------------------
 
-  CF            = ifort
+  CF            = $(COMP_MP)
   FC            = $(CF)
+  
+  OMP = -openmp
+
+  FFLAGS_INC    = -I $(NEMSIO_INC) -I $(NETCDF_INCLUDE)
+
+  FFLAGS_F90    = -convert big_endian -assume byterecl \
+				  -implicitnone -traceback
 
 #--- Normal mode options
-  PROF= #-pg
-  OMP = #-qsmp=noauto
+  FFLAGS_COM_N  = -O3 -fp-model source
 
-  FFLAGS_F90    = -D_REAL8_ -convert big_endian -assume byterecl -warn all -implicitnone -g -traceback -fp-model strict
-  FFLAGS_COM_N  = -I $(INCsfcio)
-  FFLAGS_N      = -O3 $(FFLAGS_F90) $(FFLAGS_COM_N)
+  FFLAGS_N  = $(FFLAGS_INC) $(FFLAGS_COM_N) $(FFLAGS_F90) $(OMP)
 
 #--- Debug mode options
-  FFLAGS_COM_D  =  -I ./ -O0 -xHOST -traceback -assume byterecl -debug full -g
-  FFLAGS_D  = $(FFLAGS_F90) $(FFLAGS_COM_D)
+  FFLAGS_COM_D  = -O0 -fp-model strict -g -warn all -debug all -check all
+
+  FFLAGS_D  = $(FFLAGS_INC) $(FFLAGS_COM_D) $(FFLAGS_F90) $(OMP)
 
 
 # ----------------------
 # C Compiler and options
 # ----------------------
 
-  CC            = gcc
+  CC            = $(C_COMP_MP)
 
 #--- Normal mode options
 
-  CFLAGS_N      = -DLINUX -Dfunder -I ./ -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -O3 $(PROF)
+  CFLAGS_N      = -DLINUX -Dfunder -I ./ -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -O3
 
 #--- Debug mode options
 
@@ -53,12 +60,13 @@ INCsfcio = $(COREINC)/sfcio_4
 # Linker and options
 # ------------------
 
-  LD            = $(CF) 
+  LD            = $(CF)
 
 #--- Normal mode options
-  LIBS_N        = -L$(CORELIB) -lsp_d -lw3lib-2.0_4 -lsfcio_4 -lmpi
 
-  LDFLAGS_N     =
+  LIBS_N        = $(NEMSIO_LIB) $(BACIO_LIB4) $(W3NCO_LIB4) $(NETCDF_LDFLAGS_F)
+
+  LDFLAGS_N     = -Wl,-Map,loadmap.txt $(OMP)
 
   LDFLAGS       = $(LDFLAGS_N)
 
@@ -66,7 +74,7 @@ INCsfcio = $(COREINC)/sfcio_4
 
   LIBS_D        = $(LIBS_N)
 
-  LDFLAGS_D     =
+  LDFLAGS_D     = $(LDFLAGS_N)
 
 #--- Empty out mpi library definition: embedded in compiler
 
