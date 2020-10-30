@@ -5,7 +5,7 @@ set -ax
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         exgdas_vrfyozn.sh.ecf
+# Script name:         exgdas_vrfyozn.sh
 # Script description:  Runs data extract/validation for global ozone diag data
 #
 # Author:        Ed Safford       Org: NP23         Date: 2012-01-18
@@ -32,7 +32,7 @@ set -ax
 #      >0 - some problem encountered
 #
 ################################################################################
-export scr=exgdas_vrfyozn.sh.ecf
+export scr=exgdas_vrfyozn.sh
 
 err=0
 
@@ -43,6 +43,7 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 export NET=${NET:-gfs}
 export RUN=${RUN:-gdas}
 export envir=${envir:-prod}
+export COMPONENT=${COMPONENT:-atmos}
 
 #  Command line arguments
 export PDY=${1:-${PDY:?}} 
@@ -51,7 +52,7 @@ export cyc=${2:-${cyc:?}}
 #  Directories
 export OZN_WORK_DIR=${OZN_WORK_DIR:-$(pwd)}
 export COM_IN=${COM_IN:-${COMROOT}/${NET}/${envir}}
-export COMIN=${COMIN:-$COM_IN/${RUN}.${PDY}}
+export COMIN=${COMIN:-$COM_IN/${RUN}.${PDY}/${cyc}/$COMPONENT}
 
 export HOMEgdas_ozn=${HOMEgdas_ozn:-${NWROOT}/gdas.${gdas_oznmon_ver}}
 export FIXgdas_ozn=${FIXgdas_ozn:-$HOMEgdas/fix}
@@ -128,7 +129,7 @@ fi
 
 
 if [[ "$VERBOSE" = "YES" ]]; then
-   echo "end exgdas_vrfyozn.sh.ecf, exit value = ${err}"
+   echo "end exgdas_vrfyozn.sh, exit value = ${err}"
 fi
 
 
