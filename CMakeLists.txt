@@ -107,5 +107,5 @@ target_link_libraries(nemsio::nemsio INTERFACE w3emc::w3emc_d bacio::bacio_4)
 # Get compiler flags for the utilities
 include(gsiutils_compiler_flags)
 
-add_subdirectory(util)
+add_subdirectory(src)
 
