@@ -13,9 +13,6 @@ list(APPEND SRCS
 
 add_executable(enspreproc.x ${SRCS})
 target_compile_definitions(enspreproc.x PRIVATE "WRF")
-if(TARGET gsi)
-  add_dependencies(enspreproc.x gsi)
-endif()
 target_link_libraries(enspreproc.x PRIVATE gsi::gsi)
 target_link_libraries(enspreproc.x PRIVATE NetCDF::NetCDF_Fortran)
 target_link_libraries(enspreproc.x PRIVATE MPI::MPI_Fortran)

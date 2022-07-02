@@ -15,9 +15,6 @@ list(APPEND SRCS
 
 add_executable(efsoi.x ${SRCS})
 target_compile_definitions(efsoi.x PRIVATE "_REAL8_")
-if(TARGET enkf)
-  add_dependencies(efsoi.x enkf)
-endif()
 target_link_libraries(efsoi.x PRIVATE enkf::enkf)
 target_link_libraries(efsoi.x PRIVATE NetCDF::NetCDF_Fortran)
 target_link_libraries(efsoi.x PRIVATE MPI::MPI_Fortran)

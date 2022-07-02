@@ -11,9 +11,6 @@ list(APPEND SRCS
 
 add_executable(initialens.x ${SRCS})
 target_compile_definitions(initialens.x PRIVATE "WRF")
-if(TARGET gsi)
-  add_dependencies(initialens.x gsi)
-endif()
 target_link_libraries(initialens.x PRIVATE gsi::gsi)
 target_link_libraries(initialens.x PRIVATE NetCDF::NetCDF_Fortran)
 target_link_libraries(initialens.x PRIVATE MPI::MPI_Fortran)
