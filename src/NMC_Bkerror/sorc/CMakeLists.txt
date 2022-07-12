@@ -40,5 +40,6 @@ target_link_libraries(calcstats.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(calcstats.x PRIVATE sp::sp_4)
 target_link_libraries(calcstats.x PRIVATE sigio::sigio)
 target_link_libraries(calcstats.x PRIVATE nemsio::nemsio)
+target_link_libraries(calcstats.x PRIVATE ncio::ncio)
 
 install(TARGETS calcstats.x RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
