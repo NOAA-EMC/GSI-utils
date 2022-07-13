@@ -19,5 +19,10 @@ load(pathJoin("python", python_ver))
 load(pathJoin("prod_util", prod_util_ver))
 
 load("gsiutils_common")
+unload("ncdiag")
+
+pushenv("HPC_OPT", "/apps/ops/para/libs")
+prepend_path("MODULEPATH", "/apps/ops/para/libs/modulefiles/compiler/intel/19.1.3.304")
+prepend_path("MODULEPATH", "/apps/ops/para/libs/modulefiles/mpi/intel/19.1.3.304/cray-mpich/8.1.7")
 
 whatis("Description: GSI utilities environment on WCOSS2")
