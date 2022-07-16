@@ -325,7 +325,9 @@ program getsfcensmeanp
                trim(dset%variables(nvar)%name) == 'vtype' .or. &
                trim(dset%variables(nvar)%name) == 'sltype' .or. &
                trim(dset%variables(nvar)%name) == 'sotyp' .or. &
-               trim(dset%variables(nvar)%name) == 'orog') then
+               trim(dset%variables(nvar)%name) == 'orog' .or. &
+               dset%variables(nvar)%ndims > 3 .or. &
+               trim(dset%variables(nvar)%name) == 'cldfra') then
               cycle
            endif
            call read_vardata(dset,trim(dset%variables(nvar)%name),values_2d)
