@@ -38,8 +38,9 @@ NCEP Libraries (NCEPLibs) compiled with the same compiler and MPI library (where
 | SIGIO           | 2.3.2 and above                                            |
 | SFCIO           | 1.4.1 and above                                            |
 | NEMSIO          | 2.5.2 and above                                            |
-| NCIO            | 1.0.0 and above                                            |
+| NCIO            | 1.1.2 and above                                            |
 | WRF_IO          | 1.2.0 and above                                            |
+| CRTM            | 2.3.0 and above                                            |
 
 Optional Libraries
 | Library         | Supported (tested) versions                                |
@@ -66,7 +67,7 @@ cmake -DCMAKE_INSTALL_PREFIX=<install-prefix> <CMAKE_OPTIONS> /path/to/GSI-utils
 
 If the dependencies are not located in a path recognized by `cmake` e.g. `/usr/local`, it may be necessary to provide the appropriate environment variables e.g. `<package_ROOT>` or `CMAKE_PREFIX_PATH` so that `cmake` is able to locate these dependencies.
 
-`ncdiag_ROOT` provides the path to the `ncdiag` installation on the system.  If `ncdiag_ROOT` is not available on the system, see note below on how to build standalone `ncdiag` for use with GSI-utils.  Similarly, `gsi_ROOT` and `enkf_ROOT` can be defined to provide the path to `gsi` and `enkf` libraries respectively.
+`gsi_ROOT` and `enkf_ROOT` provides the path to the `GSI` and `EnKF` installations on the system.  Refer to the installation instructions for the GSI/EnKF [here](https://github.com/NOAA-EMC/GSI/blob/develop/INSTALL.md)
 
 The installation prefix for GSI-utils tools is provided by the `cmake` command-line argument `-DCMAKE_INSTALL_PREFIX=<install-prefix>`
 
