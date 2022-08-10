@@ -19,7 +19,7 @@ import pandas as pd
 # enkf_obs_sensitivity module in GSI/src/enkf.  The relevant variable
 # declarations in enkf_obs_sensitivity are reproduced below. Two variables
 # from enkf that are in the osense file but ignored here are analobs and
-# biaspreds - analobs is used by the
+# biaspreds - analobs is used by the efsoi algorithm
 # =============================================================================
 
 # Structure for observation sensitivity information output
@@ -70,7 +70,8 @@ import pandas as pd
 
 def read_osense(filename):
 
-    # these names are the same as in enkf_obs_sensitivity, but needn't be
+    # these names are the same as in enkf_obs_sensitivity, but needn't be,
+    # though later processing assumes them
     datacolumns = ['obfit_prior',
                    'obsprd_prior',
                    'ensmean_obnobc',
@@ -118,7 +119,9 @@ def read_osense(filename):
 
         print('read header: idate = ', idate, ', convnum + oznum = ',
               convnum + oznum, ', satnum = ', satnum, ' npred = ', npred,
-              ', nanals = ', nanals)
+              ', nanals = ', nanals, ' obsnum = ', obsnum,
+              ', should equal convnum + oznum + satnum: ',
+              convnum + oznum + satnum)
 
         # now read the conventional data records
 
@@ -163,3 +166,72 @@ def read_osense(filename):
     print(satdata.describe())
 
     return((convdata, satdata, idate))
+
+
+def consolidate(convdata, satdata, sensors='Default', osensefields='Default'):
+    # takes convdata and satdata osense DataFrames and joins them in a single
+    # internally consistant DataFrame
+
+    # these are satellite sensors to consolidate across plaforms
+    if sensors == 'Default':
+        sensors = ['airs',
+                   'amsr',
+                   'amsua',
+                   'atms',
+                   'avhrr',
+                   'cris',
+                   'iasi',
+                   'mhs',
+                   'saphir',
+                   'seviri',
+                   'ssmis']
+
+    # these are fields in the osense files and can be expanded or reduced
+    if osensefields == 'Default':
+        osensefields = ['source',
+                        'detailed_source',
+                        'indxsat',
+                        'osense_kin',
+                        'osense_dry',
+                        'osense_moist',
+                        'assimilated',
+                        'lat',
+                        'lon',
+                        'pres']
+
+    # the following is to provide "sensor-platform" in the detailed_source
+    # column and "sensor" in the source column
+    satdata['detailed_source'] = satdata['obtype']
+    satdata['source'] = satdata['obtype']
+
+    for sensor in sensors:
+        mask = satdata.source.str.contains(sensor)
+        satdata.loc[mask, 'source'] = sensor.upper()
+
+    # csv file should be in repo with osense.py; there should be a more
+    # generalizable way to tell it where
+    convcodes = pd.read_csv('convdata_codes.csv')
+
+    # associate each data point with its source, by code
+    # this also effectively adds the columns 'source' and 'detailed_source'
+    convbycodes = pd.merge(convdata, convcodes, how='left',
+                           left_on='stattype',
+                           right_on='code')
+
+    # drop message='NA'/message02='Empty'
+    # data not dumped/not used
+    indices = convbycodes[convbycodes['source'] == 'Empty'].index
+    convbycodes.drop(indices, inplace=True)
+
+    # some stattypes, namely 700, have no corresponding code, and so have
+    # nans in the code, source, and detailed_source fields. This replaces those
+    # fields with the stattype
+    nanmask = convbycodes.code.isna()
+    nanstattypes = convbycodes.loc[nanmask, ['stattype']]
+    for nanstattype in nanstattypes.stattype.unique():
+        convbycodes.loc[convbycodes['stattype'] == nanstattype,
+                        ['source', 'detailed_source']] = nanstattype
+
+    osensedata = pd.concat([satdata[osensefields],
+                            convbycodes[osensefields]])
+    return(osensedata)
