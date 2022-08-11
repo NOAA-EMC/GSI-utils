@@ -3,8 +3,6 @@ from pickle import dump
 from datetime import datetime
 import os.path
 import argparse
-#import sys
-#import pandas as pd
 import osense
 
 parser = argparse.ArgumentParser()
@@ -18,12 +16,14 @@ parser.add_argument(
     type=lambda s: datetime.strptime(s, '%Y-%m-%d-%H'))
 parser.add_argument('indir', help='directory to read in osense files')
 parser.add_argument('outdir', help='directory to save reduced osense files')
+parser.add_argument('exp', help='experiment name')
 args = parser.parse_args()
 
 firstcycle = args.firstcycle
 lastcycle = args.lastcycle
 indir = args.indir
 outdir = args.outdir
+exp = args.exp
 
 print('running from', firstcycle, 'to', lastcycle)
 
@@ -39,11 +39,11 @@ for cycle in cycles:
         print(filename + ' doesn\'t exist, skipping')
         continue
 
-    (convdata, satdata, idate) = osense.read_osense(filename)
+    (convdata, satdata, cdate) = osense.read_osense(filename)
 
     osensedata = osense.consolidate(convdata, satdata)
 
     outfilename = os.path.join(outdir, 'osense_' + CDATE + '.pkl')
     print("saving file ", outfilename)
     with open(outfilename, 'wb') as outfile:
-        dump([idate, osensedata], outfile)
+        dump([exp, cycle, osensedata], outfile)

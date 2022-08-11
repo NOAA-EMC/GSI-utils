@@ -43,7 +43,7 @@ for cycle in cycles:
 
     print('loading  ' + infilename)
     with open(infilename, 'rb') as infile:
-        [idate, osensedata] = load(infile)
+        [exp, cdate, osensedata] = load(infile)
 
     columns = [grouping] + norms
     meanimpacts = osensedata[columns].groupby(grouping).mean()
@@ -53,4 +53,4 @@ for cycle in cycles:
     outfilename = os.path.join(outdir, 'osensestats_' + CDATE + '.pkl')
     print("saving file ", outfilename)
     with open(outfilename, 'wb') as outfile:
-        dump([idate, meanimpacts, sumimpacts, obcounts], outfile)
+        dump([exp, cdate, meanimpacts, sumimpacts, obcounts], outfile)
