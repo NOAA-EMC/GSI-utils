@@ -13,9 +13,6 @@ args = parser.parse_args()
 indir = args.indir
 outdir = args.outdir
 
-
-norms = ['osense_kin', 'osense_dry', 'osense_moist']
-
 infilename = os.path.join(indir, 'osensestats_all.pkl')
 
 print('loading  ' + infilename)
@@ -62,7 +59,7 @@ fig.savefig(filename, bbox_inches='tight')
 fig.clear()
 
 filename = os.path.join(outdir, exp + '_impactperobs.png')
-title = 'impact per observation (J/kg), ' + exp
+title = 'impact per observation (J/kg), ' + exp + ' ' + start + ' to ' + end
 ax = moist['mean impact per ob'].sort_values(ascending=False).plot.barh(
     xlabel='',
     ylabel='J/kg',
