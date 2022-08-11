@@ -15,7 +15,8 @@ parser.add_argument(
     'lastcycle',
     help='last cycle to process, format YYYY-MM-DD-HH',
     type=lambda s: datetime.strptime(s, '%Y-%m-%d-%H'))
-parser.add_argument('indir', help='directory to read and write osense stat files')
+parser.add_argument(
+    'indir', help='directory to read and write osense stat files')
 args = parser.parse_args()
 
 firstcycle = args.firstcycle
@@ -71,11 +72,12 @@ dry = pd.DataFrame(columns=columns)
 kin = pd.DataFrame(columns=columns)
 
 
-# The abs operators are in here so that all of the fractional impacts are 
+# The abs operators are in here so that all of the fractional impacts are
 # positive whether the mean impacts are negative or positive
 moist['mean total impact'] = moist_sum.mean(axis=1)
 moist_impact_sum = abs(moist['mean total impact']).sum()
-moist['fractional impact'] = abs(moist['mean total impact'])/moist_impact_sum * 100
+moist['fractional impact'] = abs(
+    moist['mean total impact'])/moist_impact_sum * 100
 moist['mean num obs'] = moist_count.mean(axis=1)
 moist['mean impact per ob'] = moist['mean total impact']/moist['mean num obs']
 
