@@ -1,6 +1,6 @@
 import struct
+import sys
 import pandas as pd
-
 
 # osense.py
 
@@ -117,11 +117,13 @@ def read_osense(filename):
         biaspredsf = '=' + 'f' * (npred + 1)
         biaspreds_size = struct.calcsize(biaspredsf)
 
-        print('read header: idate = ', idate, ', convnum + oznum = ',
-              convnum + oznum, ', satnum = ', satnum, ' npred = ', npred,
-              ', nanals = ', nanals, ' obsnum = ', obsnum,
-              ', should equal convnum + oznum + satnum: ',
-              convnum + oznum + satnum)
+        print('read header: idate =', idate)
+        print('convnum + oznum =', convnum + oznum)
+        print('satnum =', satnum)
+        print('npred =', npred)
+        print('nanals =', nanals)
+        print(' convnum + oznum + satnum: =', convnum +
+              oznum + satnum, ', should equal obsnum:', obsnum)
 
         # now read the conventional data records
 
@@ -165,7 +167,7 @@ def read_osense(filename):
     print(convdata.describe())
     print(satdata.describe())
 
-    return((convdata, satdata, idate))
+    return(convdata, satdata, idate)
 
 
 def consolidate(convdata, satdata, sensors='Default', osensefields='Default'):
@@ -223,15 +225,41 @@ def consolidate(convdata, satdata, sensors='Default', osensefields='Default'):
     indices = convbycodes[convbycodes['source'] == 'Empty'].index
     convbycodes.drop(indices, inplace=True)
 
-    # some stattypes, namely 700, have no corresponding code, and so have
-    # nans in the code, source, and detailed_source fields. This replaces those
-    # fields with the stattype
-    nanmask = convbycodes.code.isna()
-    nanstattypes = convbycodes.loc[nanmask, ['stattype']]
-    for nanstattype in nanstattypes.stattype.unique():
-        convbycodes.loc[convbycodes['stattype'] == nanstattype,
-                        ['source', 'detailed_source']] = nanstattype
+# this causes more trouble than it solves, but might be useful later
+    # # some stattypes, namely 700, have no corresponding code, and so have
+    # # nans in the code, source, and detailed_source fields. This replaces those
+    # # fields with the stattype
+    # nanmask = convbycodes.code.isna()
+    # nanstattypes = convbycodes.loc[nanmask, ['stattype']]
+    # for nanstattype in nanstattypes.stattype.unique():
+    #     convbycodes.loc[convbycodes['stattype'] == nanstattype,
+    #                     ['source', 'detailed_source']] = nanstattype
 
     osensedata = pd.concat([satdata[osensefields],
                             convbycodes[osensefields]])
-    return(osensedata)
+    return osensedata
+
+
+def make_cycles(firstcycle, lastcycle):
+
+    cycletimes = ['00', '06', '12', '18']
+
+    if lastcycle < firstcycle:
+        print('lastcycle', lastcycle, 'comes before firstcycle',
+              firstcycle, ', you probably don\'t want that')
+        sys.exit(1)
+
+    if firstcycle.strftime("%H") not in cycletimes:
+        print('firstcycle', firstcycle,
+              'needs to have an hour that is one of', cycletimes)
+        sys.exit(1)
+
+    if lastcycle.strftime("%H") not in cycletimes:
+        print('lastcycle', lastcycle,
+              'needs to have an hour that is one of', cycletimes)
+        sys.exit(1)
+
+    # time between cycles
+    cycles = pd.date_range(firstcycle, lastcycle, freq='6H')
+
+    return cycles
