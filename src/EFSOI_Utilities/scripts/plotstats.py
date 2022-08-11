@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import matplotlib       # Matplotlib to make graphics
+matplotlib.use('Agg')   # Need this to generate figs when not running an Xserver (e.g. via PBS/LSF)
 from pickle import load
 from datetime import datetime
 import os.path
