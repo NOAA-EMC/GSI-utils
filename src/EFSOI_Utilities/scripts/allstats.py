@@ -52,7 +52,7 @@ for cycle in cycles:
 
     print('loading  ' + infilename)
     with open(infilename, 'rb') as infile:
-        [idate, meanimpacts, sumimpacts, obcounts] = load(infile)
+        [exp, cdate, meanimpacts, sumimpacts, obcounts] = load(infile)
 
     moist_count = pd.concat([moist_count, obcounts['osense_moist']], axis=1)
     moist_mean = pd.concat([moist_mean, meanimpacts['osense_moist']], axis=1)
@@ -69,6 +69,7 @@ columns = ['mean total impact', 'fractional impact',
 moist = pd.DataFrame(columns=columns)
 dry = pd.DataFrame(columns=columns)
 kin = pd.DataFrame(columns=columns)
+
 
 # The abs operators are in here so that all of the fractional impacts are 
 # positive whether the mean impacts are negative or positive
@@ -93,4 +94,4 @@ kin['mean impact per ob'] = kin['mean total impact']/kin['mean num obs']
 outfilename = os.path.join(indir, 'osensestats_all.pkl')
 print("saving file ", outfilename)
 with open(outfilename, 'wb') as outfile:
-    dump([firstcycle, lastcycle, moist, dry, kin], outfile)
+    dump([exp, firstcycle, lastcycle, moist, dry, kin], outfile)
