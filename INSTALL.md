@@ -30,7 +30,7 @@ NCEP Libraries (NCEPLibs) compiled with the same compiler and MPI library (where
 
 | Library         | Supported (tested) versions                                |
 |-----------------|------------------------------------------------------------|
-| BUFR            | 11.4.0 and above                                           |
+| BUFR            | 11.6.0 and above                                           |
 | IP              | 3.3.3 and above                                            |
 | SP              | 2.3.3 and above                                            |
 | BACIO           | 2.4.1 and above                                            |
