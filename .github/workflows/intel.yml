@@ -9,7 +9,7 @@ defaults:
 
 # Set I_MPI_CC/F90 so Intel MPI wrapper uses icc/ifort instead of gcc/gfortran
 env:
-  cache_key: intel4  # The number (#) following the cache_key "intel" is to flush Action cache.
+  cache_key: intel5  # The number (#) following the cache_key "intel" is to flush Action cache.
   CC: icc
   FC: ifort
   CXX: icpc
@@ -39,13 +39,13 @@ jobs:
       # Cache spack, compiler and dependencies
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-4
+          key: spack-${{ runner.os }}-${{ env.cache_key }}
 
       - name: install-intel-compilers
         if: steps.cache-env.outputs.cache-hit != 'true'
@@ -94,13 +94,13 @@ jobs:
 
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-4
+          key: spack-${{ runner.os }}-${{ env.cache_key }}
 
       - name: build-gsiutils
         run: |
