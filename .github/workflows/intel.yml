@@ -71,6 +71,8 @@ jobs:
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env GSI-utils/ci/spack.yaml
           spack env activate gsiutils-env
+          sudo mv /usr/local /usr/local_mv
+          sudo apt install cmake
           spack compiler find
           spack external find
           spack add intel-oneapi-mpi
