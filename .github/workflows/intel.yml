@@ -45,7 +45,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-4
 
       - name: install-intel-compilers
         if: steps.cache-env.outputs.cache-hit != 'true'
@@ -99,7 +99,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-4
 
       - name: build-gsiutils
         run: |
