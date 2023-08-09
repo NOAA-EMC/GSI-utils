@@ -66,8 +66,8 @@ program recentersigp
   type(Dataset) :: dseti,dseto,dsetmi,dsetmo,dsetmg
   type(Dimension) :: londim,latdim,levdim
 
-  namelist /recenter/ incvars_to_zero
   character(len=12),dimension(10) :: incvars_to_zero !just picking 10 arbitrarily
+  namelist /recenter/ incvars_to_zero
 
 ! Initialize mpi
   call MPI_Init(ierr)

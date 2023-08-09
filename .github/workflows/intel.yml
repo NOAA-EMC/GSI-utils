@@ -9,7 +9,7 @@ defaults:
 
 # Set I_MPI_CC/F90 so Intel MPI wrapper uses icc/ifort instead of gcc/gfortran
 env:
-  cache_key: intel4  # The number (#) following the cache_key "intel" is to flush Action cache.
+  cache_key: intel5  # The number (#) following the cache_key "intel" is to flush Action cache.
   CC: icc
   FC: ifort
   CXX: icpc
@@ -39,7 +39,7 @@ jobs:
       # Cache spack, compiler and dependencies
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             spack
@@ -67,15 +67,16 @@ jobs:
       - name: install-dependencies-with-spack
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
-          git clone -c feature.manyFiles=true https://github.com/NOAA-EMC/spack.git
+          git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env GSI-utils/ci/spack.yaml
           spack env activate gsiutils-env
+          sudo mv /usr/local/ /usr/local_mv
           spack compiler find
           spack external find
           spack add intel-oneapi-mpi
           spack concretize
-          spack install --dirty -v
+          spack install --dirty --fail-fast -v
 
   build:
     needs: setup
@@ -93,7 +94,7 @@ jobs:
 
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             spack

@@ -53,7 +53,7 @@ jobs:
       - name: install-dependencies-with-spack
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
-          git clone -c feature.manyFiles=true https://github.com/NOAA-EMC/spack.git
+          git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env GSI-utils/ci/spack.yaml
           spack env activate gsiutils-env
@@ -61,7 +61,7 @@ jobs:
           spack external find
           spack add mpich@3.4.2
           spack concretize
-          spack install --dirty -v
+          spack install -v --fail-fast
 
   build:
     needs: setup
