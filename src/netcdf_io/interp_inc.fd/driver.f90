@@ -24,14 +24,14 @@
 
  use netcdf
  use mpi
+ use ip_mod, only: ipolates, ipolatev
 
  implicit none
 
  integer, parameter :: num_recs = 9
 
 ! Declare externals
- external :: w3tagb, netcdf_err, splat, ipolatev, &
-    ipolates, w3tage
+ external :: w3tagb, netcdf_err, splat, w3tage
 
  character(len=128) :: outfile, infile
  character(len=11)  :: records(num_recs) 
