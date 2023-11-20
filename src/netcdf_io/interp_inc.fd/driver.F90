@@ -24,7 +24,9 @@
 
  use netcdf
  use mpi
+#ifdef IP_V4
  use ip_mod, only: ipolates, ipolatev
+#endif
 
  implicit none
 
@@ -32,6 +34,9 @@
 
 ! Declare externals
  external :: w3tagb, netcdf_err, splat, w3tage
+#ifndef IP_V4
+ external :: ipolates, ipolatev
+#endif
 
  character(len=128) :: outfile, infile
  character(len=11)  :: records(num_recs) 
