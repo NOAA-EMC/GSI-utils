@@ -12,7 +12,6 @@ target_link_libraries(interp_inc.x PRIVATE ip::ip_d)
 target_link_libraries(interp_inc.x PRIVATE sp::sp_d)
 
 if(ip_VERSION VERSION_GREATER_EQUAL 4.0.0)
-   message("setting ip_v4")
    target_compile_definitions(interp_inc.x PRIVATE "IP_V4")
 endif()
 
