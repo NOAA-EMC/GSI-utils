@@ -63,7 +63,7 @@ jobs:
           spack install -v --fail-fast --dirty
           spack clean --all
 
-    gsi-monitor:
+  gsi-monitor:
     needs: setup
     runs-on: ubuntu-latest
 

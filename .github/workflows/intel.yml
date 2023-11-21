@@ -100,7 +100,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFile('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
 
       - name: build
         run: |
