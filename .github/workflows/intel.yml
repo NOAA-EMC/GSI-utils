@@ -33,7 +33,7 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: checkout # This is for getting spack.yaml
@@ -70,7 +70,6 @@ jobs:
           spack env create gsiutils-env gsi-utils/ci/spack.yaml
           spack env activate gsiutils-env
           spack compiler find
-          sudo apt install cmake
           spack external find
           spack add intel-oneapi-mpi
           spack concretize
@@ -79,7 +78,7 @@ jobs:
 
   gsi-utils:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: install-intel

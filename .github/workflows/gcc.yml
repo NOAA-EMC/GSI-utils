@@ -56,7 +56,6 @@ jobs:
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env gsi-utils/ci/spack.yaml
           spack env activate gsiutils-env
-          sudo apt install cmake
           spack external find
           spack add mpich@3.4.2
           spack concretize
