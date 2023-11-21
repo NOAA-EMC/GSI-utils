@@ -33,7 +33,7 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: checkout # This is for getting spack.yaml
@@ -69,7 +69,6 @@ jobs:
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env gsi-utils/ci/spack.yaml
           spack env activate gsiutils-env
-          sudo mv /usr/local/ /usr/local_mv
           spack compiler find
           sudo apt install cmake
           spack external find
@@ -80,7 +79,7 @@ jobs:
 
   gsi-utils:
     needs: setup
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: install-intel
