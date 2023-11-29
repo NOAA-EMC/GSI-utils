@@ -250,8 +250,12 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
 
  if (mype == npes-1) print*,'- OPEN INPUT FILE: ', trim(infile)
 
- error = nf90_open(trim(infile), ior(nf90_nowrite, nf90_mpiio), &
-                   comm=mpi_comm_world, info = mpi_info_null, ncid=ncid_in)
+ ! Opening for parallel access breaks gfsanalcalc & gdasanalcalc on S4
+ ! Also there is no parallel access, so there is no need to open for parallel
+ ! access. By Innocent.
+ !error = nf90_open(trim(infile), ior(nf90_nowrite, nf90_mpiio), &
+ !                  comm=mpi_comm_world, info = mpi_info_null, ncid=ncid_in)
+ error = nf90_open(trim(infile), ior(nf90_nowrite, nf90_mpiio), ncid=ncid_in)
  call netcdf_err(error, 'opening file='//trim(infile) )
 
  error = nf90_inq_dimid(ncid_in, 'lon', id_dim)
