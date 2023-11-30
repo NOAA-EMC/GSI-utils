@@ -1,21 +1,21 @@
 help([[
 ]])
 
-load("cmake/3.20.1")
+prepend_path("MODULEPATH", "/mnt/lfs4/HFIP/hfv3gfs/role.epic/spack-stack/spack-stack-1.5.1/envs/gsi-addon/install/modulefiles/Core")
 
-prepend_path("MODULEPATH", "/contrib/anaconda/modulefiles")
+local python_ver=os.getenv("python_ver") or "3.10.8"
+local stack_intel_ver=os.getenv("stack_intel_ver") or "2021.5.0"
+local stack_impi_ver=os.getenv("stack_impi_ver") or "2021.5.1"
+local cmake_ver=os.getenv("cmake_ver") or "3.23.1"
+local prod_util_ver=os.getenv("prod_util_ver") or "1.2.2"
 
-load("anaconda/5.3.1")
-
-prepend_path("MODULEPATH", "/lfs4/HFIP/hfv3gfs/nwprod/hpc-stack/libs/modulefiles/stack")
-
-load("hpc/1.1.0")
-load("hpc-intel/18.0.5.274")
-load("hpc-impi/2018.4.274")
+load(pathJoin("stack-intel", stack_intel_ver))
+load(pathJoin("stack-intel-oneapi-mpi", stack_impi_ver))
+load(pathJoin("python", python_ver))
+load(pathJoin("cmake", cmake_ver))
 
 load("gsiutils_common")
 
-local prod_util_ver=os.getenv("prod_util_ver") or "1.2.2"
 load(pathJoin("prod_util", prod_util_ver))
 
 pushenv("CFLAGS", "-axSSE4.2,AVX,CORE-AVX2")
