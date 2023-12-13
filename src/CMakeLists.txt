@@ -37,7 +37,6 @@ endif()
 # These utilities do not have CMake builds and are unlikely used or usable
 #add_subdirectory(Config)
 #add_subdirectory(GEN_BE_V2.0)
-#add_subdirectory(global_angupdate)
 #add_subdirectory(GMI_BUFR_gen)
 #add_subdirectory(Misc)
 #add_subdirectory(MODIS_AOD)
