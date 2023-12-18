@@ -24,4 +24,4 @@ spack:
   - cmake@3.20.1
   view: true
   concretizer:
-    unify: true
+    unify: when_possible
