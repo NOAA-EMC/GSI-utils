@@ -21,7 +21,7 @@ source $DIR_ROOT/ush/detect_machine.sh
 # Load modules
 source $DIR_ROOT/ush/module-setup.sh
 module use $DIR_ROOT/modulefiles
-module load gsiutils_$MACHINE_ID
+module load gsiutils_$MACHINE_ID.$COMPILER
 module list
 
 # Collect BUILD Options
