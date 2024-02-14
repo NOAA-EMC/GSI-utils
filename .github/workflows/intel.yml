@@ -36,6 +36,20 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      # Free up disk space
+      - name: free-disk-spack
+        run: |
+          df -h
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt clean
+          docker rmi $(docker image ls -aq)
+          df -h
+
       - name: checkout # This is for getting spack.yaml
         uses: actions/checkout@v3
         with:

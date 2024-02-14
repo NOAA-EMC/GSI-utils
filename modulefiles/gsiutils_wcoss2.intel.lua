@@ -19,7 +19,7 @@ local sigio_ver=os.getenv("sigio_ver") or "2.3.2"
 local sfcio_ver=os.getenv("sfcio_ver") or "1.4.1"
 local nemsio_ver=os.getenv("nemsio_ver") or "2.5.2"
 local wrf_io_ver=os.getenv("wrf_io_ver") or "1.2.0"
-local crtm_ver=os.getenv("crtm_ver") or "2.3.0"
+local crtm_ver=os.getenv("crtm_ver") or "2.4.0.1"
 local prod_util_ver=os.getenv("prod_util_ver") or "2.0.10"
 
 load(pathJoin("PrgEnv-intel", PrgEnv_intel_ver))
