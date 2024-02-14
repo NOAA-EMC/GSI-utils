@@ -42,6 +42,10 @@ jobs:
           df -h
           sudo swapoff -a
           sudo rm -f /swapfile
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo apt clean
           docker rmi $(docker image ls -aq)
           df -h
