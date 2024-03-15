@@ -42,9 +42,8 @@ program getsfcensmeanp
   logical:: nemsio, sfcio, ncio
 
   type(Dataset) :: dset,dseto
-  type(Dimension) :: londim,latdim,levdim
+  type(Dimension) :: londim,latdim
   real(4), allocatable, dimension(:,:) :: values_2d, values_2d_avg
-  real(4), allocatable, dimension(:,:,:):: values_3d, values_3d_avg
 
   character*500 filenamein,filenameout,datapath,fileprefix
   character*3 charnanal
@@ -309,12 +308,10 @@ program getsfcensmeanp
      elseif (ncio) then
         londim = get_dim(dset,'grid_xt'); lonb = londim%len
         latdim = get_dim(dset,'grid_yt'); latb = latdim%len
-        levdim = get_dim(dset,'pfull');   levs = levdim%len
         allocate(values_2d_avg(lonb,latb))
-        allocate(values_3d_avg(lonb,latb,levs))
         if (mype == 0) then
            dseto = create_dataset(filenameout, dset, copy_vardata=.true.)
-           print *,'opened netcdf file ',trim(filenameout)
+           print *,'opened netcdf file ',trim(filenameout),lonb,latb,levs
         endif
         do nvar=1,dset%nvars
 !          Following fields are not averaged
@@ -339,14 +336,6 @@ program getsfcensmeanp
                  print *,'writing ens mean ',trim(dset%variables(nvar)%name)
                  call write_vardata(dseto,trim(dset%variables(nvar)%name),values_2d_avg)
               endif
-           elseif (dset%variables(nvar)%ndims == 4) then
-              call read_vardata(dset,trim(dset%variables(nvar)%name),values_3d)
-              call mpi_allreduce(values_3d,values_3d_avg,lonb*latb*levs,mpi_real4,mpi_sum,new_comm,iret)
-              values_3d_avg = values_3d_avg * rnanals
-              if (mype == 0) then
-                 print *,'writing ens mean ',trim(dset%variables(nvar)%name)
-                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg)
-              endif
            else
               write(6,*)'***ERROR*** invalid ndims= ',dset%variables(nvar)%ndims,&
                    ' for variable ',trim(dset%variables(nvar)%name)
@@ -354,7 +343,7 @@ program getsfcensmeanp
            endif
         enddo
         if (mype == 0) call close_dataset(dseto)
-        deallocate(values_2d,values_2d_avg,values_3d,values_3d_avg)
+        deallocate(values_2d,values_2d_avg)
      endif
 ! Jump here if more mpi processors than files to process
   else
