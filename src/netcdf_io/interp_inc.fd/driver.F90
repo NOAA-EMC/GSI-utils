@@ -24,14 +24,19 @@
 
  use netcdf
  use mpi
+#ifdef IP_V4
+ use ip_mod, only: ipolates, ipolatev
+#endif
 
  implicit none
 
  integer, parameter :: num_recs = 9
 
 ! Declare externals
- external :: w3tagb, netcdf_err, splat, ipolatev, &
-    ipolates, w3tage
+ external :: w3tagb, netcdf_err, splat, w3tage
+#ifndef IP_V4
+ external :: ipolates, ipolatev
+#endif
 
  character(len=128) :: outfile, infile
  character(len=11)  :: records(num_recs) 
@@ -91,9 +96,9 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
 ! with data below.
 !-----------------------------------------------------------------
 
- if (mype == 0)  call w3tagb('INTERP_INC', 2019, 100, 0, 'EMC')
+ if (mype == npes-1)  call w3tagb('INTERP_INC', 2019, 100, 0, 'EMC')
 
- if (mype == 0) print*,'- READ SETUP NAMELIST'
+ if (mype == npes-1) print*,'- READ SETUP NAMELIST'
  open (43, file="./fort.43")
  read (43, nml=setup, iostat=error)
  if (error /= 0) then
@@ -102,7 +107,7 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
  endif
  close (43)
 
- if (mype == 0) print*,"- WILL INTERPOLATE TO GAUSSIAN GRID OF DIMENSION ",lon_out, lat_out
+ if (mype == npes-1) print*,"- WILL INTERPOLATE TO GAUSSIAN GRID OF DIMENSION ",lon_out, lat_out
 
 ! Set constants
  rad2deg = 180.0_8 / (4.0_8 * atan(1.0_8))
@@ -111,7 +116,7 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
  ilev=lev+1
 
  call mpi_barrier(mpi_comm_world, mpierr)
- if (mype == 0) then
+ if (mype == npes-1) then
    print*,'- OPEN OUTPUT FILE: ', trim(outfile)
   
    error = nf90_create(outfile, cmode=IOR(NF90_CLOBBER,NF90_NETCDF4), ncid=ncid_out)
@@ -243,10 +248,14 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
 ! Open and read input file
 !----------------------------------------------------
 
- if (mype == 0) print*,'- OPEN INPUT FILE: ', trim(infile)
+ if (mype == npes-1) print*,'- OPEN INPUT FILE: ', trim(infile)
 
- error = nf90_open(trim(infile), ior(nf90_nowrite, nf90_mpiio), &
-                   comm=mpi_comm_world, info = mpi_info_null, ncid=ncid_in)
+ ! Opening for parallel access breaks global workflow on S4
+ ! Also there is no parallel access, so there is no need to open for parallel
+ ! access.
+ !error = nf90_open(trim(infile), ior(nf90_nowrite, nf90_mpiio), &
+ !                  comm=mpi_comm_world, info = mpi_info_null, ncid=ncid_in)
+ error = nf90_open(trim(infile), ior(nf90_nowrite, nf90_mpiio), ncid=ncid_in)
  call netcdf_err(error, 'opening file='//trim(infile) )
 
  error = nf90_inq_dimid(ncid_in, 'lon', id_dim)
@@ -338,7 +347,7 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
    ! skip v_inc (done with u_inc, which comes first)
    if (trim(records(rec)) .eq. 'v_inc') cycle
 
-   if (mype == rec) then
+   if (mype == rec-1) then
      print*,'- PROCESS RECORD: ', trim(records(rec))
   
      error = nf90_inq_varid(ncid_in, trim(records(rec)), id_var)
@@ -379,9 +388,9 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
           stop 77
         endif
         call mpi_send(go(1,1), size(go), mpi_double_precision, &
-                      0, 1000+rec, mpi_comm_world, mpierr)
+                      npes-1, 1000+rec, mpi_comm_world, mpierr)
         call mpi_send(go3(1,1), size(go3), mpi_double_precision, &
-                      0, 2000+rec, mpi_comm_world, mpierr)
+                      npes-1, 2000+rec, mpi_comm_world, mpierr)
      else
         call ipolates(ip, ipopt, kgds_in, kgds_out, mi, mo, &
                    lev, ibi, li, gi, no, rlat, rlon, ibo, &
@@ -397,12 +406,12 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
         !dummy_out = reshape(go, (/lon_out,lat_out,lev/))
         !print *, lon_out, lat_out, lev, 'send'
         call mpi_send(go(1,1), size(go), mpi_double_precision, &
-                      0, 1000+rec, mpi_comm_world, mpierr)
+                      npes-1, 1000+rec, mpi_comm_world, mpierr)
      endif
-   else if (mype == 0) then
+   else if (mype == npes-1) then
      !print *, lon_out, lat_out, lev, 'recv'
      call mpi_recv(go2(1,1), size(go2), mpi_double_precision, &
-                   rec, 1000+rec, mpi_comm_world, mpistat, mpierr)
+                   rec-1, 1000+rec, mpi_comm_world, mpistat, mpierr)
      dummy_out = reshape(go2, (/lon_out,lat_out,lev/))
      error = nf90_inq_varid(ncid_out, trim(records(rec)), id_var)
      call netcdf_err(error, 'inquiring ' // trim(records(rec)) // ' id for file='//trim(outfile) )
@@ -411,7 +420,7 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
      if (trim(records(rec)) .eq. 'u_inc') then
         ! process v_inc also.
         call mpi_recv(go2(1,1), size(go2), mpi_double_precision, &
-                      rec, 2000+rec, mpi_comm_world, mpistat, mpierr)
+                      rec-1, 2000+rec, mpi_comm_world, mpistat, mpierr)
         dummy_out = reshape(go2, (/lon_out,lat_out,lev/))
         error = nf90_inq_varid(ncid_out, 'v_inc', id_var)
         call netcdf_err(error, 'inquiring v_inc id for file='//trim(outfile) )
@@ -435,7 +444,7 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
 ! Update remaining output file records according to Cory's sample.
 !------------------------------------------------------------------
 
- if (mype == 0) then
+ if (mype == npes-1) then
    print*,"- WRITE OUTPUT FILE: ", trim(outfile)
   
   ! lev
@@ -490,9 +499,9 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
  end if
 
  call mpi_barrier(mpi_comm_world, mpierr)
- if (mype == 0) print*,'- NORMAL TERMINATION'
+ if (mype == npes-1) print*,'- NORMAL TERMINATION'
 
- if (mype == 0) call w3tage('INTERP_INC')
+ if (mype == npes-1) call w3tage('INTERP_INC')
  call mpi_barrier(mpi_comm_world, mpierr)
  call mpi_finalize(mpierr)
 

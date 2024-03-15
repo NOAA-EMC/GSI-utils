@@ -1,7 +1,7 @@
 help([[
 ]])
 
-prepend_path("MODULEPATH", "/scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.6.0/envs/gsi-addon-dev/install/modulefiles/Core")
+prepend_path("MODULEPATH", "/mnt/lfs4/HFIP/hfv3gfs/role.epic/spack-stack/spack-stack-1.6.0/envs/gsi-addon-dev/install/modulefiles/Core")
 
 local python_ver=os.getenv("python_ver") or "3.11.6"
 local stack_intel_ver=os.getenv("stack_intel_ver") or "2021.5.0"
@@ -18,7 +18,7 @@ load("gsiutils_common")
 
 load(pathJoin("prod_util", prod_util_ver))
 
-pushenv("CFLAGS", "-xHOST")
-pushenv("FFLAGS", "-xHOST")
+pushenv("CFLAGS", "-axSSE4.2,AVX,CORE-AVX2")
+pushenv("FFLAGS", "-axSSE4.2,AVX,CORE-AVX2")
 
-whatis("Description: GSI utilities environment on Hera with Intel Compilers")
+whatis("Description: GSI utilities environment on Jet with Intel Compilers")

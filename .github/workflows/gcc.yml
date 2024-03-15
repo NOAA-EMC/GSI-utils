@@ -8,7 +8,7 @@ defaults:
     shell: bash -leo pipefail {0}
 
 env:
-  cache_key: gcc4  # The number (#) following the cache_key "gcc" is to flush Action cache.
+  cache_key: gcc
   CC: gcc-10
   FC: gfortran-10
   CXX: g++-10
@@ -24,71 +24,84 @@ env:
 
 # The jobs are split into:
 # 1. a dependency build step (setup), and
-# 2. a GSI-utils build step (build)
+# 2. a GSI-utils build step (gsi-utils)
 # The setup is run once and the environment is cached,
-# so each build of GSI-utils can reuse the cached dependencies to save time (and compute).
+# so each subsequent build of GSI-utils can reuse the cached dependencies to save time (and compute).
 
 jobs:
   setup:
     runs-on: ubuntu-latest
 
     steps:
+      # Free up disk space
+      - name: free-disk-spack
+        run: |
+          df -h
+          sudo swapoff -a
+          sudo rm -rf /swapfile
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt clean
+          docker rmi $(docker image ls -aq)
+          df -h
+
+      - name: checkout  # This is for getting spack.yaml
+        uses: actions/checkout@v3
+        with:
+            path: gsi-utils
+
       # Cache spack, compiler and dependencies
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}
-
-      - name: checkout-gsiutils  # This is for getting spack.yaml
-        if: steps.cache-env.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-            path: GSI-utils
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
 
       # Install dependencies using Spack
       - name: install-dependencies-with-spack
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
-          git clone -c feature.manyFiles=true https://github.com/NOAA-EMC/spack.git
+          git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
           source spack/share/spack/setup-env.sh
-          spack env create gsiutils-env GSI-utils/ci/spack.yaml
+          spack env create gsiutils-env gsi-utils/ci/spack.yaml
           spack env activate gsiutils-env
-          spack compiler find
           spack external find
           spack add mpich@3.4.2
           spack concretize
-          spack install --dirty -v
+          spack install -v --fail-fast --dirty
+          spack clean --all
 
-  build:
+  gsi-monitor:
     needs: setup
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout-gsiutils
-        uses: actions/checkout@v2
+      - name: checkout
+        uses: actions/checkout@v3
         with:
-            path: GSI-utils
+            path: gsi-utils
 
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
 
-      - name: build-gsiutils
+      - name: build
         run: |
           source spack/share/spack/setup-env.sh
           spack env activate gsiutils-env
           export CC=mpicc
           export FC=mpif90
-          cd GSI-utils
+          cd gsi-utils
           mkdir -p build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON ..
           make -j2 VERBOSE=1
