@@ -6,6 +6,7 @@
 !!           2019-10-24   martin   - removed support for NEMSIO background but
 !!                                   allows for either NEMSIO or netCDF analysis write
 !!           2020-01-21   martin   - parallel IO support added
+!!           2024-04-04   martin   - aerosol support added
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module inc2anl 
   implicit none
@@ -17,7 +18,8 @@ module inc2anl
   integer, parameter :: nincv=10
   character(len=7) :: incvars_nemsio(nincv), incvars_netcdf(nincv), incvars_ncio(nincv)
   integer, parameter :: nnciov=20
-  character(len=7) :: iovars_netcdf(nnciov)
+  integer, parameter :: naero=14
+  character(len=7) :: iovars_netcdf(nnciov), incvars_aero(naero)
 
   data incvars_nemsio / 'ugrd   ', 'vgrd   ', 'dpres  ', 'delz   ', 'o3mr   ',&
                         'tmp    ', 'spfh   ', 'clwmr  ', 'icmr   ', 'pres   '/
@@ -29,6 +31,8 @@ module inc2anl
                         'delz   ', 'dpres  ', 'dzdt   ', 'grle   ', 'hgtsfc ',&
                         'icmr   ', 'o3mr   ', 'pressfc', 'rwmr   ', 'snmr   ',&
                         'spfh   ', 'tmp    ', 'ugrd   ', 'vgrd   ', 'cld_amt'/
+  data incvars_aero / 'bc1    ', 'bc2    ', 'dust1  ', 'dust2  ', 'dust3  ', 'dust4  ', 'dust5  ',&
+                      'oc1    ', 'oc2    ', 'seas1  ', 'seas2  ', 'seas3  ', 'seas4  ', 'so4    '/
 
 contains
   subroutine gen_anl
@@ -38,7 +42,7 @@ contains
   !            increment, add the two together, and write out
   !            the analysis to a new file
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    use vars_calc_analysis, only: mype 
+    use vars_calc_analysis, only: mype, do_aero
     implicit none
     ! variables local to this subroutine
     integer :: i, j, iincvar
@@ -72,6 +76,14 @@ contains
         call copy_ges_to_anl(iovars_netcdf(i))
       end if
     end do
+
+    ! if including aerosols, loop and add them
+    if (do_aero) then
+      do i=1,naero
+        if (mype==0) print *, 'Adding Increment to ', incvars_aero(i)
+        call add_aero_inc(incvars_aero(i))
+      end do
+    end if
 
   end subroutine gen_anl
 

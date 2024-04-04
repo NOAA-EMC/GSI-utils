@@ -6,6 +6,7 @@
 !!           2019-09-26   martin   - add support for netCDF read/write
 !!           2019-10-24   martin   - support NEMSIO output write
 !!           2020-01-17   martin   - parallel IO support added
+!!           2024-04-04   martin   - aerosol support
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module vars_calc_analysis
   use nemsio_module, only: nemsio_gfile
@@ -23,6 +24,7 @@ module vars_calc_analysis
   public :: work1
   public :: nhrs_assim
   public :: use_nemsio_anl
+  public :: do_aero
   public :: fcstncfile, anlncfile, incncfile
   public :: fhrs_pe
   public :: fhr
@@ -39,7 +41,7 @@ module vars_calc_analysis
   type(nemsio_gfile) :: anlfile
   real, allocatable, dimension(:) :: work1
   integer :: nhrs_assim, fhr
-  logical :: use_nemsio_anl
+  logical :: use_nemsio_anl, do_aero
   type(Dataset) :: fcstncfile, anlncfile, incncfile
   integer, dimension(7) :: fhrs_pe
   integer :: mype, npes
