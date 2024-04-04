@@ -19,7 +19,8 @@ module inc2anl
   character(len=7) :: incvars_nemsio(nincv), incvars_netcdf(nincv), incvars_ncio(nincv)
   integer, parameter :: nnciov=20
   integer, parameter :: naero=14
-  character(len=7) :: iovars_netcdf(nnciov), incvars_aero(naero)
+  character(len=7) :: iovars_netcdf(nnciov), iovars_aero(naero)
+  character(len=50) :: incvars_aero(naero)
 
   data incvars_nemsio / 'ugrd   ', 'vgrd   ', 'dpres  ', 'delz   ', 'o3mr   ',&
                         'tmp    ', 'spfh   ', 'clwmr  ', 'icmr   ', 'pres   '/
@@ -31,8 +32,19 @@ module inc2anl
                         'delz   ', 'dpres  ', 'dzdt   ', 'grle   ', 'hgtsfc ',&
                         'icmr   ', 'o3mr   ', 'pressfc', 'rwmr   ', 'snmr   ',&
                         'spfh   ', 'tmp    ', 'ugrd   ', 'vgrd   ', 'cld_amt'/
-  data incvars_aero / 'bc1    ', 'bc2    ', 'dust1  ', 'dust2  ', 'dust3  ', 'dust4  ', 'dust5  ',&
-                      'oc1    ', 'oc2    ', 'seas1  ', 'seas2  ', 'seas3  ', 'seas4  ', 'so4    '/
+  data iovars_aero / 'so4    ', 'bc1    ', 'bc2    ', 'oc1    ', 'oc2    ', &
+                     'dust1  ', 'dust2  ', 'dust3  ', 'dust4  ', 'dust5  ',&
+                     'seas1  ', 'seas2  ', 'seas3  ', 'seas4  '/
+  data incvars_aero / 'mass_fraction_of_sulfate_in_air',&
+                      'mass_fraction_of_hydrophobic_black_carbon_in_air', &
+                      'mass_fraction_of_hydrophilic_black_carbon_in_air', &
+                      'mass_fraction_of_hydrophobic_organic_carbon_in_air', &
+                      'mass_fraction_of_hydrophilic_organic_carbon_in_air', &
+                      'mass_fraction_of_dust001_in_air', 'mass_fraction_of_dust002_in_air', &
+                      'mass_fraction_of_dust003_in_air', 'mass_fraction_of_dust004_in_air', &
+                      'mass_fraction_of_dust005_in_air', 'mass_fraction_of_sea_salt001_in_air', & 
+                      'mass_fraction_of_sea_salt002_in_air', 'mass_fraction_of_sea_salt003_in_air', &
+                      'mass_fraction_of_sea_salt004_in_air' /
 
 contains
   subroutine gen_anl
@@ -80,8 +92,8 @@ contains
     ! if including aerosols, loop and add them
     if (do_aero) then
       do i=1,naero
-        if (mype==0) print *, 'Adding Increment to ', incvars_aero(i)
-        call add_aero_inc(incvars_aero(i))
+        if (mype==0) print *, 'Adding Increment to ', iovars_aero(i)
+        call add_aero_inc(iovars_aero(i), incvars_aero(i))
       end do
     end if
 
@@ -175,13 +187,14 @@ contains
 
   end subroutine copy_ges_to_anl
 
-  subroutine add_aero_inc(aerovar)
+  subroutine add_aero_inc(fcstvar, incvar)
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! subroutine add_aero_inc
   !            generic subroutine for adding increment to background
   !            and writing out to analysis for aerosol variables
   !  args:
-  !       aerovar - input string of netCDF aerosol var name
+  !       fcstvar - input string of netCDF fcst/anal var name
+  !       incvar  - input string of netCDF increment var name
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     use vars_calc_analysis, only: fcstncfile, anlncfile, aero_file,&
     nlat, nlon, nlev, anlfile, levpe, mype
@@ -190,7 +203,8 @@ contains
     use nemsio_module
     implicit none
     ! input vars
-    character(7), intent(in) :: aerovar
+    character(7), intent(in) :: fcstvar
+    character(50), intent(in) :: incvar
     ! local variables
     real, allocatable, dimension(:,:,:) :: work3d_bg
     real, allocatable, dimension(:,:) :: work3d_inc
@@ -200,17 +214,17 @@ contains
     do k=1,nlev
       if (mype == levpe(k)) then
         ! get first guess
-        call read_vardata(fcstncfile, aerovar, work3d_bg, nslice=k, slicedim=3)
+        call read_vardata(fcstncfile, trim(fcstvar), work3d_bg, nslice=k, slicedim=3)
         ! get increment
         incncfile = open_dataset(aero_file, paropen=.true.)
-        call read_vardata(incncfile, trim(aerovar), work3d_inc, nslice=k, slicedim=3)
+        call read_vardata(incncfile, trim(incvar), work3d_inc, nslice=k, slicedim=3)
         ! add increment to background
         do j=1,nlat
             jj=nlat+1-j ! increment is S->N, history files are N->S
             work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc(:,jj)
         end do
         ! write out analysis to file
-        call write_vardata(anlncfile, trim(aerovar), work3d_bg, nslice=k, slicedim=3)
+        call write_vardata(anlncfile, trim(fcstvar), work3d_bg, nslice=k, slicedim=3)
       end if
     end do
     ! clean up and close
