@@ -175,6 +175,50 @@ contains
 
   end subroutine copy_ges_to_anl
 
+  subroutine add_aero_inc(aerovar)
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! subroutine add_aero_inc
+  !            generic subroutine for adding increment to background
+  !            and writing out to analysis for aerosol variables
+  !  args:
+  !       aerovar - input string of netCDF aerosol var name
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    use vars_calc_analysis, only: fcstncfile, anlncfile, aero_file,&
+    nlat, nlon, nlev, anlfile, levpe, mype
+    use module_ncio, only: Dataset, read_vardata, write_vardata, &
+        open_dataset, close_dataset, has_var
+    use nemsio_module
+    implicit none
+    ! input vars
+    character(7), intent(in) :: aerovar
+    ! local variables
+    real, allocatable, dimension(:,:,:) :: work3d_bg
+    real, allocatable, dimension(:,:) :: work3d_inc
+    real, allocatable, dimension(:) :: work1d
+    integer :: j,jj,k,krev,iret
+    type(Dataset) :: incncfile
+    do k=1,nlev
+      if (mype == levpe(k)) then
+        ! get first guess
+        call read_vardata(fcstncfile, aerovar, work3d_bg, nslice=k, slicedim=3)
+        ! get increment
+        incncfile = open_dataset(incr_file, paropen=.true.)
+        call read_vardata(incncfile, trim(aerovar), work3d_inc, nslice=k, slicedim=3)
+        ! add increment to background
+        do j=1,nlat
+            jj=nlat+1-j ! increment is S->N, history files are N->S
+            work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc(:,jj)
+        end do
+        ! write out analysis to file
+        call write_vardata(anlncfile, fcstvar, work3d_bg, nslice=k, slicedim=3)
+      end if
+    end do
+    ! clean up and close
+    deallocate(work3d_bg, work3d_inc)
+    call close_dataset(incncfile)
+
+  end subroutine add_aero_inc
+
   subroutine add_increment(fcstvar, incvar)
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! subroutine add_increment

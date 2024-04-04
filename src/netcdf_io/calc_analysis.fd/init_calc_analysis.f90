@@ -15,7 +15,7 @@ contains
     !! read in namelist parameters from
     !! calc_analysis.nml file in same directory
     !! as executable
-    use vars_calc_analysis, only: anal_file, fcst_file, incr_file, use_nemsio_anl, do_aero, fhr, mype, npes
+    use vars_calc_analysis, only: anal_file, fcst_file, incr_file, aero_file, use_nemsio_anl, do_aero, fhr, mype, npes
     implicit none
     ! local variables to this subroutine
     character(len=500) :: datapath = './'
