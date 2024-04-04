@@ -1,14 +1,14 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!! module inc2anl 
+!! module inc2anl
 !!        contains subroutines for calculating analysis fields
-!!        for a given input background and increment 
+!!        for a given input background and increment
 !! Original: 2019-09-18   martin   - original module
 !!           2019-10-24   martin   - removed support for NEMSIO background but
 !!                                   allows for either NEMSIO or netCDF analysis write
 !!           2020-01-21   martin   - parallel IO support added
 !!           2024-04-04   martin   - aerosol support added
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-module inc2anl 
+module inc2anl
   implicit none
 
   private
@@ -72,7 +72,7 @@ contains
         end if
       else
         ! otherwise just write out what is in the input to the output
-        if (mype==0) print *, 'Copying from Background ', iovars_netcdf(i) 
+        if (mype==0) print *, 'Copying from Background ', iovars_netcdf(i)
         call copy_ges_to_anl(iovars_netcdf(i))
       end if
     end do
@@ -169,7 +169,7 @@ contains
             end do
           end if
       end select
-    else 
+    else
       if (mype == 0) write(6,*) varname, 'not in background file, skipping...'
     end if
 
@@ -202,7 +202,7 @@ contains
         ! get first guess
         call read_vardata(fcstncfile, aerovar, work3d_bg, nslice=k, slicedim=3)
         ! get increment
-        incncfile = open_dataset(incr_file, paropen=.true.)
+        incncfile = open_dataset(aero_file, paropen=.true.)
         call read_vardata(incncfile, trim(aerovar), work3d_inc, nslice=k, slicedim=3)
         ! add increment to background
         do j=1,nlat
@@ -210,7 +210,7 @@ contains
             work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc(:,jj)
         end do
         ! write out analysis to file
-        call write_vardata(anlncfile, fcstvar, work3d_bg, nslice=k, slicedim=3)
+        call write_vardata(anlncfile, trim(aerovar), work3d_bg, nslice=k, slicedim=3)
       end if
     end do
     ! clean up and close
@@ -223,7 +223,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! subroutine add_increment
   !            generic subroutine for adding increment to background
-  !            and writing out to analysis 
+  !            and writing out to analysis
   !  args:
   !       fcstvar - input string of netCDF fcst/anal var name
   !       incvar  - input string of netCDF increment var name
@@ -244,7 +244,7 @@ contains
     real, allocatable, dimension(:) :: work1d
     integer :: j,jj,k,krev,iret
     type(Dataset) :: incncfile
-    
+
     if (has_var(fcstncfile, fcstvar)) then
       do k=1,nlev
         if (mype == levpe(k)) then
@@ -274,17 +274,17 @@ contains
       ! clean up and close
       deallocate(work3d_bg, work3d_inc)
       call close_dataset(incncfile)
-    else 
+    else
       write(6,*) fcstvar, ' not in background file, skipping...'
     end if
-  
+
   end subroutine add_increment
 
   subroutine add_psfc_increment
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! subroutine add_psfc_increment
   !            special case of getting surface pressure analysis from
-  !            bk5 and delp increment to get sfc pressure increment 
+  !            bk5 and delp increment to get sfc pressure increment
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     use vars_calc_analysis, only: fcstncfile, anlncfile, nlat, nlon, incr_file,&
                                   use_nemsio_anl, anlfile, nlev
@@ -300,7 +300,7 @@ contains
     type(Dataset) :: incncfile
 
     ! get bk5 from attributes
-    call read_attribute(fcstncfile, 'bk', bk5) 
+    call read_attribute(fcstncfile, 'bk', bk5)
     ! read in delp increment to get ps increment
     incncfile = open_dataset(incr_file)
     call read_vardata(incncfile, 'delp_inc', work3d_inc)
@@ -317,7 +317,7 @@ contains
     ! write out to file
     if (use_nemsio_anl) then
       allocate(work1d(nlon*nlat))
-      ! now write out new psfc to NEMSIO analysis file 
+      ! now write out new psfc to NEMSIO analysis file
       work1d = reshape(work2d,(/size(work1d)/))
       call nemsio_writerecv(anlfile, 'pres', 'sfc', 1, work1d, iret=iret)
       if (iret /=0) write(6,*) 'Error with NEMSIO write sfc pressure'
