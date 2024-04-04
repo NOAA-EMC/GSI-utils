@@ -217,12 +217,9 @@ contains
         call read_vardata(fcstncfile, trim(fcstvar), work3d_bg, nslice=k, slicedim=3)
         ! get increment
         incncfile = open_dataset(aero_file, paropen=.true.)
-        call read_vardata(incncfile, trim(incvar), work3d_inc, nslice=k, slicedim=3)
+        call read_vardata(incncfile, trim(incvar), work3d_inc, nslice=k, slicedim=1)
         ! add increment to background
-        do j=1,nlat
-            jj=nlat+1-j ! increment is S->N, history files are N->S
-            work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc(:,jj)
-        end do
+        work3d_bg(:,:,1) = work3d_bg(:,:,1) + work3d_inc(:,:)
         ! write out analysis to file
         call write_vardata(anlncfile, trim(fcstvar), work3d_bg, nslice=k, slicedim=3)
       end if
