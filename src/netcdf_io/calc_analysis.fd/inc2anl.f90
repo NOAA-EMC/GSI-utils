@@ -175,7 +175,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     use vars_calc_analysis, only: fcstncfile, anlncfile, incr_file,&
                                   nlat, nlon, nlev, anlfile, use_nemsio_anl, &
-                                  levpe, mype
+                                  levpe, mype, jedi
     use module_ncio, only: Dataset, read_vardata, write_vardata, &
                                   open_dataset, close_dataset, has_var
     use nemsio_module
@@ -184,7 +184,8 @@ contains
     character(7), intent(in) :: fcstvar, incvar
     ! local variables
     real, allocatable, dimension(:,:,:) :: work3d_bg
-    real, allocatable, dimension(:,:) :: work3d_inc
+    real, allocatable, dimension(:,:) :: work3d_inc_gsi
+    real, allocatable, dimension(:,:,:) :: work3d_inc_jedi
     real, allocatable, dimension(:) :: work1d
     integer :: j,jj,k,krev,iret
     type(Dataset) :: incncfile
@@ -196,12 +197,22 @@ contains
           call read_vardata(fcstncfile, fcstvar, work3d_bg, nslice=k, slicedim=3)
           ! get increment
           incncfile = open_dataset(incr_file, paropen=.true.)
-          call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc, nslice=k, slicedim=3)
-          ! add increment to background
-          do j=1,nlat
-             jj=nlat+1-j ! increment is S->N, history files are N->S
-             work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc(:,jj)
-          end do
+          ! JEDI-derived increments have a time dimension, so read to appropriate array
+          if ( jedi ) then
+             call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc_jedi, nslice=k, slicedim=3)
+             ! add increment to background
+             do j=1,nlat
+                jj=nlat+1-j ! increment is S->N, history files are N->S
+                work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc_jedi(:,jj,1)
+             end do
+          else
+             call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc_gsi, nslice=k, slicedim=3)
+             ! add increment to background
+             do j=1,nlat
+                jj=nlat+1-j ! increment is S->N, history files are N->S
+                work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc_gsi(:,jj)
+             end do
+          end if
           ! write out analysis to file
           if (use_nemsio_anl) then
             allocate(work1d(nlat*nlon))
@@ -216,7 +227,12 @@ contains
         end if
       end do
       ! clean up and close
-      deallocate(work3d_bg, work3d_inc)
+      if ( jedi ) then
+        deallocate(work3d_inc_jedi)
+      else
+        deallocate(work3d_inc_gsi)
+      end if
+      deallocate(work3d_bg)
       call close_dataset(incncfile)
     else 
       write(6,*) fcstvar, ' not in background file, skipping...'
