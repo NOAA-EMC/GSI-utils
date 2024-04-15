@@ -30,6 +30,7 @@ module vars_calc_analysis
   public :: fhr
   public :: mype, npes
   public :: levpe
+  public :: jedi
 
   character(len=500) :: anal_file, fcst_file, incr_file, aero_file
   integer, dimension(7) :: idate, jdate
@@ -46,5 +47,6 @@ module vars_calc_analysis
   integer, dimension(7) :: fhrs_pe
   integer :: mype, npes
   integer, allocatable, dimension(:) :: levpe
+  logical :: jedi
 
 end module vars_calc_analysis
