@@ -19,7 +19,6 @@ UTIL_OPTS=${UTIL_OPTS:-"-DBUILD_UTIL_ALL=ON"} # By default build all GFS utiliti
 source $DIR_ROOT/ush/detect_machine.sh
 
 # Load modules
-source $DIR_ROOT/ush/module-setup.sh
 module use $DIR_ROOT/modulefiles
 module load gsiutils_$MACHINE_ID.$COMPILER
 module list
