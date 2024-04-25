@@ -1,4 +1,5 @@
 help([[
+GSI utilities environment on NOAA Cloud with Intel Compilers
 ]])
 
 prepend_path("MODULEPATH", "/contrib/spack-stack/spack-stack-1.6.0/envs/unified-env/install/modulefiles/Core")
@@ -22,4 +23,4 @@ load("bufr/11.7.0")
 pushenv("CFLAGS", "-xHOST")
 pushenv("FFLAGS", "-xHOST")
 
-whatis("Description: GSI utilities environment on Hera with Intel Compilers")
+whatis("Description: GSI utilities environment on NOAA Cloud with Intel Compilers")
