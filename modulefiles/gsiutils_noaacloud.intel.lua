@@ -19,7 +19,6 @@ load(pathJoin("cmake", cmake_ver))
 load("gsiutils_common")
 load(pathJoin("prod_util", prod_util_ver))
 
-load("bufr/11.7.0")
 pushenv("CFLAGS", "-xHOST")
 pushenv("FFLAGS", "-xHOST")
 
