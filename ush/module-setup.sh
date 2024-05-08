@@ -86,6 +86,7 @@ elif [[ $MACHINE_ID = noaacloud* ]]; then
         source /apps/lmod/8.5.2/init/bash
     fi
     module purge
+
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
 fi
