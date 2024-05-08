@@ -64,32 +64,8 @@ elif [[ $MACHINE_ID = gaea* ]] ; then
         # /etc/profile here.
         source /etc/profile
         __ms_source_etc_profile=yes
-    else
-        __ms_source_etc_profile=no
     fi
-    module purge
-    # clean up after purge
-    unset _LMFILES_
-    unset _LMFILES_000
-    unset _LMFILES_001
-    unset LOADEDMODULES
-    module load modules
-    if [[ -d /opt/cray/ari/modulefiles ]] ; then
-        module use -a /opt/cray/ari/modulefiles
-    fi
-    if [[ -d /opt/cray/pe/ari/modulefiles ]] ; then
-        module use -a /opt/cray/pe/ari/modulefiles
-    fi
-    if [[ -d /opt/cray/pe/craype/default/modulefiles ]] ; then
-        module use -a /opt/cray/pe/craype/default/modulefiles
-    fi
-    if [[ -s /etc/opt/cray/pe/admin-pe/site-config ]] ; then
-        source /etc/opt/cray/pe/admin-pe/site-config
-    fi
-    if [[ "$__ms_source_etc_profile" == yes ]] ; then
-        source /etc/profile
-        unset __ms_source_etc_profile
-    fi
+    module reset
 
 elif [[ $MACHINE_ID = expanse* ]]; then
     # We are on SDSC Expanse
@@ -104,13 +80,6 @@ elif [[ $MACHINE_ID = discover* ]]; then
     export SPACK_ROOT=/discover/nobackup/mapotts1/spack
     export PATH=$PATH:$SPACK_ROOT/bin
     . $SPACK_ROOT/share/spack/setup-env.sh
-
-elif [[ $MACHINE_ID = noaacloud* ]]; then
-    # We are on NOAA Cloud
-    if ( ! eval module help > /dev/null 2>&1 ) ; then
-        source /apps/lmod/8.5.2/init/bash
-    fi
-    module purge
 
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
