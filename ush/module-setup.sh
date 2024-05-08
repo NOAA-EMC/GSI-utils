@@ -63,7 +63,6 @@ elif [[ $MACHINE_ID = gaea* ]] ; then
         # the module command fails.  Hence we actually have to source
         # /etc/profile here.
         source /etc/profile
-        __ms_source_etc_profile=yes
     fi
     module reset
 

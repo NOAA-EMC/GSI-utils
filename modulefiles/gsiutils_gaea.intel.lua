@@ -19,7 +19,4 @@ load("gsiutils_common")
 
 load(pathJoin("prod_util", prod_util_ver))
 
---pushenv("CFLAGS", "-xHOST")
---pushenv("FFLAGS", "-xHOST")
-
-whatis("Description: GSI utilities environment on Hera with Intel Compilers")
+whatis("Description: GSI utilities environment on Gaea with Intel Compilers")
