@@ -46,7 +46,7 @@ program getsigensmeanp_smooth
                         filenameoutsprd
   character(len=16),allocatable,dimension(:) :: recnam
   integer :: iret,nlevs,ntrac,ntrunc,nanals,ngrd,k,ndims,nvar,nbits
-  integer :: nsize,nsize2,nsize3,nsize3t,iargc
+  integer :: nsize,nsize2,nsize3,nsize3t
   integer :: mype,mype1,npe,orig_group,new_group,new_comm
   integer :: nrec,latb,lonb,npts,n,idrt
   integer,allocatable,dimension(:) :: new_group_members,reclev,krecu,krecv
