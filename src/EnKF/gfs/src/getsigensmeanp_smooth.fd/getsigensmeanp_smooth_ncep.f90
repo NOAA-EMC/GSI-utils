@@ -108,7 +108,7 @@ program getsigensmeanp_smooth
   endif
 
   if ( mype == 0 ) then
-     write(6,'(a,i,a)')  'Command line input for ',iargc(),' arguments'
+     write(6,'(a,i3,a)')  'Command line input for ',iargc(),' arguments'
      write(6,'(a,a)')' datapath    = ',trim(datapath)
      write(6,'(a,a)')' filenameout = ',trim(filenameout)
      write(6,'(a,a)')' fileprefix  = ',trim(fileprefix)
