@@ -1,7 +1,6 @@
 help([[
 ]])
 
-prepend_path("MODULEPATH", "/ncrc/proj/epic/spack-stack/spack-stack-1.6.0/envs/unified-env/install/modulefiles/Core")
 prepend_path("MODULEPATH", "/ncrc/proj/epic/spack-stack/spack-stack-1.6.0/envs/gsi-addon-dev/install/modulefiles/Core")
 
 local python_ver=os.getenv("python_ver") or "3.11.6"
@@ -18,5 +17,8 @@ load(pathJoin("cmake", cmake_ver))
 load("gsiutils_common")
 
 load(pathJoin("prod_util", prod_util_ver))
+
+pushenv("CFLAGS", "-xHOST")
+pushenv("FFLAGS", "-xHOST")
 
 whatis("Description: GSI utilities environment on Gaea with Intel Compilers")
