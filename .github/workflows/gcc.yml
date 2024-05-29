@@ -76,7 +76,7 @@ jobs:
           spack install -v --fail-fast --dirty
           spack clean --all
 
-  gsi-monitor:
+  gsi-utils:
     needs: setup
     runs-on: ubuntu-latest
 
@@ -99,10 +99,11 @@ jobs:
         run: |
           source spack/share/spack/setup-env.sh
           spack env activate gsiutils-env
-          export CC=mpicc
-          export FC=mpif90
           cd gsi-utils
           mkdir -p build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON ..
           make -j2 VERBOSE=1
           make install
+        env:
+          CC: mpicc
+          FC: mpif90
