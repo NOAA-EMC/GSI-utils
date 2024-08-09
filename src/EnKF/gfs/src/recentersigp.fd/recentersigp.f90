@@ -303,7 +303,11 @@ program recentersigp
               call write_vardata(dseto,trim(dseti%variables(nvar)%name),values_3d)
            end if
         end do
-        deallocate(values_3d,values_3d_i,values_3d_mi,values_3d_mb,values_3d_anl)
+        if (allocated(values_3d))    deallocate(values_3d)
+        if (allocated(values_3d_i))  deallocate(values_3d_i)
+        if (allocated(values_3d_mi)) deallocate(values_3d_mi)
+        if (allocated(values_3d_mb)) deallocate(values_3d_mb)
+        if (allocated(values_3d_anl)) deallocate(values_3d_anl)
         call write_attribute(dseto,'comment','recentered analysis increment using recentersigp') 
         call close_dataset(dsetmi)
         call close_dataset(dsetmo)
@@ -369,8 +373,14 @@ program recentersigp
            endif ! ndims > 2
         enddo  ! nvars
 
-        deallocate(values_2d,values_2d_i,values_2d_mi,values_2d_mo)
-        deallocate(values_3d,values_3d_i,values_3d_mi,values_3d_mo)
+        if (allocated(values_2d)) deallocate(values_2d)
+        if (allocated(values_2d_i)) deallocate(values_2d_i)
+        if (allocated(values_2d_mi)) deallocate(values_2d_mi)
+        if (allocated(values_2d_mo)) deallocate(values_2d_mo)
+        if (allocated(values_3d)) deallocate(values_3d)
+        if (allocated(values_3d_i)) deallocate(values_3d_i)
+        if (allocated(values_3d_mi)) deallocate(values_3d_mi)
+        if (allocated(values_3d_mo)) deallocate(values_3d_mo)
         call close_dataset(dsetmi)
         call close_dataset(dsetmo)
         call close_dataset(dseti)
