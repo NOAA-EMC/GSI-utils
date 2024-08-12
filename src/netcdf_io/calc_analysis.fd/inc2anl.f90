@@ -42,7 +42,7 @@ module inc2anl
                       'mass_fraction_of_hydrophilic_organic_carbon_in_air', &
                       'mass_fraction_of_dust001_in_air', 'mass_fraction_of_dust002_in_air', &
                       'mass_fraction_of_dust003_in_air', 'mass_fraction_of_dust004_in_air', &
-                      'mass_fraction_of_dust005_in_air', 'mass_fraction_of_sea_salt001_in_air', & 
+                      'mass_fraction_of_dust005_in_air', 'mass_fraction_of_sea_salt001_in_air', &
                       'mass_fraction_of_sea_salt002_in_air', 'mass_fraction_of_sea_salt003_in_air', &
                       'mass_fraction_of_sea_salt004_in_air' /
 
@@ -216,7 +216,7 @@ contains
         ! get first guess
         call read_vardata(fcstncfile, trim(fcstvar), work3d_bg, nslice=k, slicedim=3)
         ! get increment
-        incncfile = open_dataset(aero_file, paropen=.true.)
+        incncfile = open_dataset(aero_file)
         call read_vardata(incncfile, trim(incvar), work3d_inc, nslice=k, slicedim=1)
         ! add increment to background
         work3d_bg(:,:,1) = work3d_bg(:,:,1) + work3d_inc(:,:)
