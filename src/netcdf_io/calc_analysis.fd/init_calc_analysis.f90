@@ -30,6 +30,7 @@ contains
 
     fhr = 6 ! default to 6 hour cycle only
     use_nemsio_anl = .false. ! default to using netCDF for background and analysis
+    do_aero = .false. ! default to only do atm, not aero also
     jedi = .false. ! default to GSI (not JEDI)
 
     ! read in the namelist
