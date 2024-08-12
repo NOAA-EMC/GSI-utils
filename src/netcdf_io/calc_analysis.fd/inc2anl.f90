@@ -6,7 +6,7 @@
 !!           2019-10-24   martin   - removed support for NEMSIO background but
 !!                                   allows for either NEMSIO or netCDF analysis write
 !!           2020-01-21   martin   - parallel IO support added
-!!           2024-04-04   martin   - aerosol support added
+!!           2024-08-12   martin   - aerosol support added
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 module inc2anl
   implicit none
@@ -19,7 +19,8 @@ module inc2anl
   character(len=7) :: incvars_nemsio(nincv), incvars_netcdf(nincv), incvars_ncio(nincv)
   integer, parameter :: nnciov=20
   integer, parameter :: naero=14
-  character(len=7) :: iovars_netcdf(nnciov), iovars_aero(naero)
+  integer, parameter :: naero_copy=6
+  character(len=7) :: iovars_netcdf(nnciov), iovars_aero(naero), copyvars_aero(naero_copy)
   character(len=50) :: incvars_aero(naero)
 
   data incvars_nemsio / 'ugrd   ', 'vgrd   ', 'dpres  ', 'delz   ', 'o3mr   ',&
@@ -45,6 +46,7 @@ module inc2anl
                       'mass_fraction_of_dust005_in_air', 'mass_fraction_of_sea_salt001_in_air', &
                       'mass_fraction_of_sea_salt002_in_air', 'mass_fraction_of_sea_salt003_in_air', &
                       'mass_fraction_of_sea_salt004_in_air' /
+  data copyvars_aero / 'seas5  ', 'so2    ', 'dms    ', 'msa    ', 'pm25   ', 'pm10   ' /
 
 contains
   subroutine gen_anl
@@ -94,6 +96,11 @@ contains
       do i=1,naero
         if (mype==0) print *, 'Adding Increment to ', iovars_aero(i)
         call add_aero_inc(iovars_aero(i), incvars_aero(i))
+      end do
+      ! need to handle fields that just need copied
+      do i=1,naero_copy
+        if (mype==0) print *, 'Copying from Background ', copyvars_aero(i)
+        call copy_ges_to_anl(copyvars_aero(i))
       end do
     end if
 
