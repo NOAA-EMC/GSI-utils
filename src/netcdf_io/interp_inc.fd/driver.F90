@@ -371,6 +371,7 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
      ! handle missing hydrometeor increments
      if (error .ne. 0 ) then
        if (ANY((/ 'rwmr_inc', 'snmr_inc', 'grle_inc' /) == trim(records(rec)))) then
+         print *, 'WARNING: ', trim(records(rec)), ' is missing in increment file. Skipping.'
          cycle
        end if
      end if
