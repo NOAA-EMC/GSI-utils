@@ -81,6 +81,7 @@
  real(8), allocatable :: gi(:,:), gi2(:,:), go(:,:), go2(:,:), go3(:,:)
  real(8), allocatable :: send_layer(:), recv_layer(:)
 
+ logical :: readvar
 
  ! NOTE: u_inc,v_inc must be consecutive
  data records /'u_inc', 'v_inc', 'delp_inc', 'delz_inc', 'T_inc', &
@@ -366,18 +367,24 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
 
    if (mype == rec-1) then
      print*,'- PROCESS RECORD: ', trim(records(rec))
+     readvar = .true.
   
      error = nf90_inq_varid(ncid_in, trim(records(rec)), id_var)
      ! handle missing hydrometeor increments
-     if (error .ne. 0 ) then
+     if (error .ne. 0) then
        if (ANY((/ 'rwmr_inc', 'snmr_inc', 'grle_inc' /) == trim(records(rec)))) then
          print *, 'WARNING: ', trim(records(rec)), ' is missing in increment file. Skipping.'
-         cycle
+         readvar = .false.
+       else
+         call netcdf_err(error, 'inquiring ' // trim(records(rec)) // ' id for file='//trim(infile) )
        end if
      end if
-     call netcdf_err(error, 'inquiring ' // trim(records(rec)) // ' id for file='//trim(infile) )
-     error = nf90_get_var(ncid_in, id_var, dummy_in)
-     call netcdf_err(error, 'reading ' //  trim(records(rec)) // ' for file='//trim(infile) )
+     if (readvar) then
+       error = nf90_get_var(ncid_in, id_var, dummy_in)
+       call netcdf_err(error, 'reading ' //  trim(records(rec)) // ' for file='//trim(infile) )
+     else
+       dummy_in(:,:,:) = 0.0
+     end if
   
      ip = 0 ! bilinear
      ipopt = 0
