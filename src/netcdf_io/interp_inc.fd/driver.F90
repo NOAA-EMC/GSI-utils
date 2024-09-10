@@ -368,6 +368,12 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
      print*,'- PROCESS RECORD: ', trim(records(rec))
   
      error = nf90_inq_varid(ncid_in, trim(records(rec)), id_var)
+     ! handle missing hydrometeor increments
+     if (error .ne. 0 ) then
+       if (ANY((/ 'rwmr_inc', 'snmr_inc', 'grle_inc' /) == trim(records(rec)))) then
+         cycle
+       end if
+     end if
      call netcdf_err(error, 'inquiring ' // trim(records(rec)) // ' id for file='//trim(infile) )
      error = nf90_get_var(ncid_in, id_var, dummy_in)
      call netcdf_err(error, 'reading ' //  trim(records(rec)) // ' for file='//trim(infile) )
