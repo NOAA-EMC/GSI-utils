@@ -36,7 +36,7 @@ module inc2anl
                         'delz   ', 'dpres  ', 'dzdt   ', 'grle   ', 'hgtsfc ',&
                         'icmr   ', 'o3mr   ', 'pressfc', 'rwmr   ', 'snmr   ',&
                         'spfh   ', 'tmp    ', 'ugrd   ', 'vgrd   ', 'cld_amt',&
-                        'nccice ', 'nconrd ', 'omga   '/
+                        'nccice ', 'nconrd '/
   data iovars_aero / 'so4    ', 'bc1    ', 'bc2    ', 'oc1    ', 'oc2    ', &
                      'dust1  ', 'dust2  ', 'dust3  ', 'dust4  ', 'dust5  ',&
                      'seas1  ', 'seas2  ', 'seas3  ', 'seas4  '/
