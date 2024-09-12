@@ -17,7 +17,7 @@ module inc2anl
 
   integer, parameter :: nincv=13
   character(len=7) :: incvars_nemsio(nincv), incvars_netcdf(nincv), incvars_ncio(nincv)
-  integer, parameter :: nnciov=22
+  integer, parameter :: nnciov=23
   integer, parameter :: naero=14
   integer, parameter :: naero_copy=6
   character(len=7) :: iovars_netcdf(nnciov), iovars_aero(naero), copyvars_aero(naero_copy)
@@ -36,7 +36,7 @@ module inc2anl
                         'delz   ', 'dpres  ', 'dzdt   ', 'grle   ', 'hgtsfc ',&
                         'icmr   ', 'o3mr   ', 'pressfc', 'rwmr   ', 'snmr   ',&
                         'spfh   ', 'tmp    ', 'ugrd   ', 'vgrd   ', 'cld_amt',&
-                        'nccice ', 'nconrd '/
+                        'nccice ', 'nconrd ', 'omga   '/
   data iovars_aero / 'so4    ', 'bc1    ', 'bc2    ', 'oc1    ', 'oc2    ', &
                      'dust1  ', 'dust2  ', 'dust3  ', 'dust4  ', 'dust5  ',&
                      'seas1  ', 'seas2  ', 'seas3  ', 'seas4  '/
@@ -277,12 +277,14 @@ contains
           incncfile = open_dataset(incr_file, paropen=.true.)
           ! JEDI-derived increments have a time dimension, so read to appropriate array
           if ( jedi ) then
-             call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc_jedi, nslice=k, slicedim=3)
-             ! add increment to background
-             do j=1,nlat
-                jj=nlat+1-j ! increment is S->N, history files are N->S
-                work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc_jedi(:,jj,1)
-             end do
+             if (has_var(incncfile, trim(incvar)//"_inc")) then
+                call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc_jedi, nslice=k, slicedim=3)
+                ! add increment to background, otherwise do nothing
+                do j=1,nlat
+                   jj=nlat+1-j ! increment is S->N, history files are N->S
+                   work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc_jedi(:,jj,1)
+                end do
+             endif
           else
              call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc_gsi, nslice=k, slicedim=3)
              ! add increment to background
@@ -306,7 +308,7 @@ contains
       end do
       ! clean up and close
       if ( jedi ) then
-        deallocate(work3d_inc_jedi)
+        if (allocated(work3d_inc_jedi)) deallocate(work3d_inc_jedi)
       else
         deallocate(work3d_inc_gsi)
       end if
