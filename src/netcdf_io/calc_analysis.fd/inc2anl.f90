@@ -17,7 +17,7 @@ module inc2anl
 
   integer, parameter :: nincv=13
   character(len=7) :: incvars_nemsio(nincv), incvars_netcdf(nincv), incvars_ncio(nincv)
-  integer, parameter :: nnciov=23
+  integer, parameter :: nnciov=22
   integer, parameter :: naero=14
   integer, parameter :: naero_copy=6
   character(len=7) :: iovars_netcdf(nnciov), iovars_aero(naero), copyvars_aero(naero_copy)
