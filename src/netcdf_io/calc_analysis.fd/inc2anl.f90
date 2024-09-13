@@ -60,11 +60,11 @@ contains
   !            increment, add the two together, and write out
   !            the analysis to a new file
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    use vars_calc_analysis, only: mype, do_aero
+    use vars_calc_analysis, only: mype, do_aero, jedi
     implicit none
     ! variables local to this subroutine
     integer :: i, j, iincvar
-    logical :: use_increment
+    logical :: use_increment,readinc
 
 
     ! loop through each variable in the background file
@@ -85,9 +85,15 @@ contains
           call add_psfc_increment
         else
           ! call generic subroutine for all other fields
-          if (mype==0) print *, 'Adding Increment to ', iovars_netcdf(i), incvars_netcdf(iincvar)
-          call add_increment(iovars_netcdf(i), incvars_netcdf(iincvar))
-        end if
+          call add_increment(iovars_netcdf(i), incvars_netcdf(iincvar), readinc)
+          if (mype==0) then
+            if ((.not.jedi) .or. (jedi.and.readinc)) then
+               print *, 'Adding Increment to ', iovars_netcdf(i), incvars_netcdf(iincvar)
+            else
+               print *, 'Copying from Background ', iovars_netcdf(i)
+            endif
+          endif
+        endif
       else
         ! otherwise just write out what is in the input to the output
         if (mype==0) print *, 'Copying from Background ', iovars_netcdf(i)
@@ -241,7 +247,7 @@ contains
 
   end subroutine add_aero_inc
 
-  subroutine add_increment(fcstvar, incvar)
+  subroutine add_increment(fcstvar, incvar, readinc)
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! subroutine add_increment
   !            generic subroutine for adding increment to background
@@ -250,6 +256,7 @@ contains
   !       fcstvar - input string of netCDF fcst/anal var name
   !       incvar  - input string of netCDF increment var name
   !                 (without _inc suffix added)
+  !       readinc - .true. if read increment, .false otherwise
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     use vars_calc_analysis, only: fcstncfile, anlncfile, incr_file,&
                                   nlat, nlon, nlev, anlfile, use_nemsio_anl, &
@@ -260,6 +267,7 @@ contains
     implicit none
     ! input vars
     character(7), intent(in) :: fcstvar, incvar
+    logical, intent(out):: readinc
     ! local variables
     real, allocatable, dimension(:,:,:) :: work3d_bg
     real, allocatable, dimension(:,:) :: work3d_inc_gsi
@@ -268,6 +276,7 @@ contains
     integer :: j,jj,k,krev,iret
     type(Dataset) :: incncfile
 
+    readinc=.true.
     if (has_var(fcstncfile, fcstvar)) then
       do k=1,nlev
         if (mype == levpe(k)) then
@@ -284,6 +293,8 @@ contains
                    jj=nlat+1-j ! increment is S->N, history files are N->S
                    work3d_bg(:,j,1) = work3d_bg(:,j,1) + work3d_inc_jedi(:,jj,1)
                 end do
+             else
+                readinc = .false.
              endif
           else
              call read_vardata(incncfile, trim(incvar)//"_inc", work3d_inc_gsi, nslice=k, slicedim=3)
