@@ -344,8 +344,7 @@ contains
     use nemsio_module
     implicit none
     ! local variables
-    real, allocatable, dimension(:,:,:) :: work3d_inc
-    real, allocatable, dimension(:,:) :: ps_inc, work2d
+    real, allocatable, dimension(:,:) :: ps_inc, work2d, work2d_inc
     real, allocatable, dimension(:) :: bk5, work1d
     integer :: iret, j, jj
     type(Dataset) :: incncfile
@@ -354,10 +353,10 @@ contains
     call read_attribute(fcstncfile, 'bk', bk5)
     ! read in delp increment to get ps increment
     incncfile = open_dataset(incr_file)
-    call read_vardata(incncfile, 'delp_inc', work3d_inc)
+    call read_vardata(incncfile, 'delp_inc', work2d_inc, nslice=nlev, slicedim=3)
     ! get ps increment from delp increment and bk
     allocate(ps_inc(nlon,nlat))
-    ps_inc(:,:) = work3d_inc(:,:,nlev) / (bk5(nlev) - bk5(nlev-1))
+    ps_inc(:,:) = work2d_inc(:,:) / (bk5(nlev) - bk5(nlev-1))
     ! read in psfc background
     call read_vardata(fcstncfile, 'pressfc', work2d)
     ! add increment to background
@@ -378,7 +377,7 @@ contains
     end if
     ! deallocate and close
     call close_dataset(incncfile)
-    deallocate(work2d,work3d_inc,ps_inc,bk5)
+    deallocate(work2d,work2d_inc,ps_inc,bk5)
 
   end subroutine add_psfc_increment
 
