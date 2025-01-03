@@ -44,10 +44,11 @@ jobs:
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo apt clean
-          docker rmi $(docker image ls -aq)
+          DOCKER_IMGS=$(docker image ls -aq)
+          if [[ ! -z "${DOCKER_IMGS}" ]]; then docker rmi ${DOCKER_IMGS}; fi
           df -h
 
-      - name: checkout  # This is for getting spack.yaml
+      - name: checkout  # This is for getting spack.yml
         if: steps.cache-env.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
@@ -61,7 +62,7 @@ jobs:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}
 
       # Install dependencies using Spack
       - name: install-dependencies-with-spack
@@ -95,7 +96,7 @@ jobs:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}
 
       - name: build
         run: |

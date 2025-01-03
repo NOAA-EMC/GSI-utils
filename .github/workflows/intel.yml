@@ -52,7 +52,7 @@ jobs:
           if [[ ! -z "${DOCKER_IMGS}" ]]; then docker rmi ${DOCKER_IMGS}; fi
           df -h
 
-      - name: checkout # This is for getting spack.yaml
+      - name: checkout # This is for getting spack.yml
         if: steps.cache-env.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
@@ -67,7 +67,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi/ci/spack.yaml') }}-1
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-1
 
       - name: install-intel-compilers
         if: steps.cache-env.outputs.cache-hit != 'true'
@@ -119,7 +119,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}
 
       - name: build
         run: |
