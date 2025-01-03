@@ -1,13 +1,13 @@
-# Spack environment file to build GSI utilities dependencies
-# Note:
-# GSI and EnKF are not being built by spack
-# GSI and EnKF will be added later; likely as their own builds or some other way
+# Spack environment file to build GSI dependencies
 spack:
   packages:
     all:
-      compiler: [intel, gcc@10:10]
+      providers:
+        mpi: [intel-oneapi-mpi]
+      compiler:
+        - intel
   specs:
-  - netcdf-c@4.9.2
+  - netcdf-c@4.9.2 ~blosc build_system=cmake
   - netcdf-fortran@4.6.1
   - bufr@11.7.0
   - bacio@2.4.1
@@ -18,9 +18,10 @@ spack:
   - sfcio@1.4.1
   - nemsio@2.5.4
   - wrf-io@1.2.0
-  - crtm@2.4.0.1
   - ncio@1.1.2
+  - crtm@2.4.0.1
   - gsi-ncdiag@1.1.2
+  - intel-oneapi-mpi@2021.10.0
   view: true
   concretizer:
-    unify: when_possible
+    unify: true
