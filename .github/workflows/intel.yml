@@ -95,7 +95,7 @@ jobs:
           spack external find
           spack concretize
           spack install --fail-fast --dirty
-          spack clean --all
+          spack clean -a
 
   gsi-utils:
     needs: setup
