@@ -338,25 +338,30 @@ contains
   !            bk5 and delp increment to get sfc pressure increment
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     use vars_calc_analysis, only: fcstncfile, anlncfile, nlat, nlon, incr_file,&
-                                  use_nemsio_anl, anlfile, nlev
+                                  use_nemsio_anl, anlfile, nlev, jedi
     use module_ncio, only: Dataset, open_dataset, close_dataset,&
                                   read_vardata, write_vardata, read_attribute
     use nemsio_module
     implicit none
     ! local variables
+    real, allocatable, dimension(:,:,:) :: work3d_inc
     real, allocatable, dimension(:,:) :: ps_inc, work2d, work2d_inc
     real, allocatable, dimension(:) :: bk5, work1d
     integer :: iret, j, jj
     type(Dataset) :: incncfile
 
+    allocate(ps_inc(nlon,nlat))
     ! get bk5 from attributes
     call read_attribute(fcstncfile, 'bk', bk5)
-    ! read in delp increment to get ps increment
+    ! read in delp increment to get ps increment from delp increment and bk
     incncfile = open_dataset(incr_file)
-    call read_vardata(incncfile, 'delp_inc', work2d_inc, nslice=nlev, slicedim=3)
-    ! get ps increment from delp increment and bk
-    allocate(ps_inc(nlon,nlat))
-    ps_inc(:,:) = work2d_inc(:,:) / (bk5(nlev) - bk5(nlev-1))
+    if (.not.jedi) then
+       call read_vardata(incncfile, 'delp_inc', work2d_inc, nslice=nlev, slicedim=3)
+       ps_inc(:,:) = work2d_inc(:,:) / (bk5(nlev) - bk5(nlev-1))
+    else
+       call read_vardata(incncfile, 'delp_inc', work3d_inc)
+       ps_inc(:,:) = work3d_inc(:,:,nlev) / (bk5(nlev) - bk5(nlev-1))
+    endif
     ! read in psfc background
     call read_vardata(fcstncfile, 'pressfc', work2d)
     ! add increment to background
@@ -377,7 +382,12 @@ contains
     end if
     ! deallocate and close
     call close_dataset(incncfile)
-    deallocate(work2d,work2d_inc,ps_inc,bk5)
+    deallocate(work2d,ps_inc,bk5)
+    if (jedi) then
+       deallocate(work3d_inc)
+    else
+       deallocate(work2d_inc)
+    endif
 
   end subroutine add_psfc_increment
 
