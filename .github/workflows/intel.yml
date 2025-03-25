@@ -33,7 +33,7 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       # Free up disk space
@@ -41,17 +41,20 @@ jobs:
         run: |
           df -h
           sudo swapoff -a
-          sudo rm -f /swapfile
+          sudo rm -rf /swapfile
+          sudo rm -rf /usr_local_mv
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo apt clean
-          docker rmi $(docker image ls -aq)
+          DOCKER_IMGS=$(docker image ls -aq)
+          if [[ ! -z "${DOCKER_IMGS}" ]]; then docker rmi ${DOCKER_IMGS}; fi
           df -h
 
-      - name: checkout # This is for getting spack.yaml
-        uses: actions/checkout@v3
+      - name: checkout # This is for getting spack.yml
+        if: steps.cache-env.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4
         with:
             path: gsi-utils
 
@@ -64,35 +67,39 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-1
 
       - name: install-intel-compilers
+        if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
           sudo apt-get update
           sudo apt-get install intel-oneapi-dev-utilities intel-oneapi-mpi-devel intel-oneapi-openmp intel-oneapi-compiler-fortran-2023.2.1 intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-2023.2.1
+          sudo apt-get clean
           echo "source /opt/intel/oneapi/setvars.sh" >> ~/.bash_profile
 
       # Install dependencies using Spack
       - name: install-dependencies-with-spack
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
+          sudo mv /usr/local/ /usr_local_mv
+          sudo apt-get install cmake
+          rm -rf spack
           git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
           source spack/share/spack/setup-env.sh
-          spack env create gsiutils-env gsi-utils/ci/spack.yaml
+          spack env create gsiutils-env gsi-utils/ci/spack_intel.yaml
           spack env activate gsiutils-env
           spack compiler find
           spack external find
-          spack add intel-oneapi-mpi
           spack concretize
-          spack install --dirty --fail-fast -v
-          spack clean --all
+          spack install --fail-fast --dirty
+          spack clean -a
 
   gsi-utils:
     needs: setup
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: install-intel
@@ -100,7 +107,7 @@ jobs:
           echo "source /opt/intel/oneapi/setvars.sh" >> ~/.bash_profile
 
       - name: checkout-gsiutils
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
             path: gsi-utils
 
@@ -112,16 +119,19 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}
 
       - name: build
         run: |
+          sudo mv /usr/local/ /usr_local_mv
+          sudo apt-get install cmake libblas-dev liblapack-dev
           source spack/share/spack/setup-env.sh
           spack env activate gsiutils-env
-          export CC=mpiicc
-          export FC=mpiifort
           cd gsi-utils
           mkdir -p build && cd build
           cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON ..
           make -j2 VERBOSE=1
           make install
+        env:
+          CC: mpiicc
+          FC: mpiifort
