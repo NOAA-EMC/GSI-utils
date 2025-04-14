@@ -259,7 +259,7 @@ program recentersigp
         allocate(values_3d(lonb,latb,levs))
         do nvar=1,dseti%nvars
            ndims = dseti%variables(nvar)%ndims
-           if (ndims == 3) then ! only 3D fields need to be processed
+           if (ndims == 3 .or. ndims == 4) then ! only 3D (or 4D w/ time dim) fields need to be processed
               call read_vardata(dseti,trim(dseti%variables(nvar)%name),values_3d_i)
               call read_vardata(dsetmi,trim(dseti%variables(nvar)%name),values_3d_mi)
               ! need to do select case since ges/anl and increment have different varnames
@@ -308,7 +308,7 @@ program recentersigp
         if (allocated(values_3d_mi)) deallocate(values_3d_mi)
         if (allocated(values_3d_mb)) deallocate(values_3d_mb)
         if (allocated(values_3d_anl)) deallocate(values_3d_anl)
-        call write_attribute(dseto,'comment','recentered analysis increment using recentersigp') 
+        call write_attribute(dseto,'comment','recentered analysis increment using recentersigp')
         call close_dataset(dsetmi)
         call close_dataset(dsetmo)
         call close_dataset(dsetmg)

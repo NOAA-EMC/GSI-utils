@@ -48,10 +48,11 @@ jobs:
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo apt clean
-          docker rmi $(docker image ls -aq)
+          DOCKER_IMGS=$(docker image ls -aq)
+          if [[ ! -z "${DOCKER_IMGS}" ]]; then docker rmi ${DOCKER_IMGS}; fi
           df -h
 
-      - name: checkout # This is for getting spack.yaml
+      - name: checkout # This is for getting spack.yml
         if: steps.cache-env.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
@@ -66,9 +67,10 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-1
 
       - name: install-intel-compilers
+        if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
@@ -84,17 +86,16 @@ jobs:
         run: |
           sudo mv /usr/local/ /usr_local_mv
           sudo apt-get install cmake
+          rm -rf spack
           git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
           source spack/share/spack/setup-env.sh
-          spack env create gsiutils-env gsi-utils/ci/spack.yaml
+          spack env create gsiutils-env gsi-utils/ci/spack_intel.yaml
           spack env activate gsiutils-env
           spack compiler find
-          sudo apt install cmake
           spack external find
-          spack add intel-oneapi-mpi
           spack concretize
-          spack install --dirty --fail-fast -v
-          spack clean --all
+          spack install --fail-fast --dirty
+          spack clean -a
 
   gsi-utils:
     needs: setup
@@ -118,10 +119,12 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}
 
       - name: build
         run: |
+          sudo mv /usr/local/ /usr_local_mv
+          sudo apt-get install cmake libblas-dev liblapack-dev
           source spack/share/spack/setup-env.sh
           spack env activate gsiutils-env
           cd gsi-utils
