@@ -8,10 +8,11 @@ if [[ $MACHINE_ID = jet* ]] ; then
     fi
     module purge
 elif [[ $MACHINE_ID = container* ]] ; then
-    if ( ! eval module help > /dev/null 2>&1 ) ; then
+    # if ( ! eval module help > /dev/null 2>&1 ) ; then
         source /usr/lmod/lmod/init/bash
-    fi
+    # fi
     module purge
+    unset MODULEPATH
 
 elif [[ $MACHINE_ID = hera* ]] ; then
     # We are on NOAA Hera
