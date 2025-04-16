@@ -418,7 +418,8 @@ program getsigensmeanp_smooth
                         call write_attribute(dseto_smooth,&
                         'max_abs_compression_error',compress_err,trim(dset%variables(nvar)%name))
                      endif
-                     call write_vardata(dseto_smooth,trim(dset%variables(nvar)%name),values_2d)
+                     call write_vardata(dseto_smooth,trim(dset%variables(nvar)%name),values_2d,&
+                          ncstart=(/1,1,1/), nccount=(/lonb,latb,1/))
                   endif
                   ! write ens mean
                   if (mype == 0) then
@@ -428,7 +429,8 @@ program getsigensmeanp_smooth
                        call write_attribute(dseto,&
                        'max_abs_compression_error',compress_err,trim(dset%variables(nvar)%name))
                      endif
-                     call write_vardata(dseto,trim(dset%variables(nvar)%name),values_2d_avg)
+                     call write_vardata(dseto,trim(dset%variables(nvar)%name),values_2d_avg,&
+                          ncstart=(/1,1,1/), nccount=(/lonb,latb,1/))
                      if (write_spread_ncio) then
                         if (quantize) then
                           values_2d_tmp = values_2d_sprd
@@ -436,7 +438,8 @@ program getsigensmeanp_smooth
                           call write_attribute(dseto_sprd,&
                           'max_abs_compression_error',compress_err,trim(dset%variables(nvar)%name))
                         endif
-                        call write_vardata(dseto_sprd,trim(dset%variables(nvar)%name),values_2d_sprd)
+                        call write_vardata(dseto_sprd,trim(dset%variables(nvar)%name),values_2d_sprd,&
+                             ncstart=(/1,1,1/), nccount=(/lonb,latb,1/))
                      endif
                   endif
                else if (ndims == 4) then
@@ -519,8 +522,10 @@ program getsigensmeanp_smooth
                            call write_attribute(dseto_smooth,&
                            'max_abs_compression_error',compress_err,'vgrd')
                         endif
-                        call write_vardata(dseto_smooth,'ugrd',values_3d)
-                        call write_vardata(dseto_smooth,'vgrd',values_3dv)
+                        call write_vardata(dseto_smooth,'ugrd',values_3d,&
+                             ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
+                        call write_vardata(dseto_smooth,'vgrd',values_3dv,&
+                             ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                      else
                         ! do scalars.
                         if (trim(dset%variables(nvar)%name) /= 'ugrd' .and. &
@@ -545,7 +550,8 @@ program getsigensmeanp_smooth
                            call write_attribute(dseto_smooth,&
                            'max_abs_compression_error',compress_err,trim(dset%variables(nvar)%name))
                         endif
-                        call write_vardata(dseto_smooth,trim(dset%variables(nvar)%name),values_3d)
+                        call write_vardata(dseto_smooth,trim(dset%variables(nvar)%name),values_3d,&
+                             ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                      endif
                   endif
                   if (mype == 0) then
@@ -555,7 +561,8 @@ program getsigensmeanp_smooth
                        call write_attribute(dseto,&
                        'max_abs_compression_error',compress_err,trim(dset%variables(nvar)%name))
                      endif
-                     call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg)
+                     call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg,&
+                          ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                      ! if smoothing on, write u and v together
                      if (dosmooth .and. trim(dset%variables(nvar)%name) == 'ugrd') then
                         if (quantize) then
@@ -564,7 +571,8 @@ program getsigensmeanp_smooth
                           call write_attribute(dseto,&
                           'max_abs_compression_error',compress_err,'vgrd')
                         endif
-                        call write_vardata(dseto,'vgrd',values_3dv_avg)
+                        call write_vardata(dseto,'vgrd',values_3dv_avg,&
+                             ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                      endif
                      if (write_spread_ncio) then
                         if (quantize) then
@@ -573,7 +581,8 @@ program getsigensmeanp_smooth
                           call write_attribute(dseto_sprd,&
                           'max_abs_compression_error',compress_err,trim(dset%variables(nvar)%name))
                         endif
-                        call write_vardata(dseto_sprd,trim(dset%variables(nvar)%name),values_3d_sprd)
+                        call write_vardata(dseto_sprd,trim(dset%variables(nvar)%name),values_3d_sprd,&
+                             ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                         ! if smoothing on, write u and v together
                         if (dosmooth .and. trim(dset%variables(nvar)%name) == 'ugrd') then
                            if (quantize) then
@@ -582,7 +591,8 @@ program getsigensmeanp_smooth
                              call write_attribute(dseto_sprd,&
                              'max_abs_compression_error',compress_err,'vgrd')
                            endif
-                           call write_vardata(dseto_sprd,'vgrd',values_3dv_sprd)
+                           call write_vardata(dseto_sprd,'vgrd',values_3dv_sprd,&
+                                ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                         endif
                      endif
                   endif
@@ -647,9 +657,11 @@ program getsigensmeanp_smooth
                  if (mype == 0) print *,trim(dset%variables(nvar)%name),' min/max spread',minval(values_3d_sprd),maxval(values_3d_sprd)
               endif
               if (mype == 0) then
-                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg)
+                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg,&
+                      ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                  if (write_spread_ncio) then
-                    call write_vardata(dseto_sprd,trim(dset%variables(nvar)%name),values_3d_sprd)
+                    call write_vardata(dseto_sprd,trim(dset%variables(nvar)%name),values_3d_sprd,&
+                         ncstart=(/1,1,1,1/), nccount=(/lonb,latb,nlevs,1/))
                  end if
               end if
            end if ! end if 3D var
