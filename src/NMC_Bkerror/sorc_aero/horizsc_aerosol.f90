@@ -1,6 +1,7 @@
 subroutine horizsc_aerosol(numcases,mype)
   use kinds, only: r_kind,i_kind
   use postmod, only: smoothlat
+  use sp_mod, only: splaplac
   use variables,only: nlat,nlon,nsig,lat1,lon1,zero,&
       displs_g,ijn,db_prec,filunit1,filunit2,npe,&
       d1hln,d2hln,d3hln,d4hln,d5hln,s1hln,s2hln,s3hln,s4hln, &
@@ -19,7 +20,7 @@ subroutine horizsc_aerosol(numcases,mype)
   real(r_kind),dimension(lat1,lon1,nsig):: d1a,d2a,d3a,d4a,d5a, &
       s1a,s2a,s3a,s4a,so4a,oc1a,oc2a,bc1a,bc2a
   real(r_kind),dimension(lat1,lon1,nsig):: d1b,d2b,d3b,d4b,d5b, &
-      s1b,s2b,s3b,s4b,so4b,oc1b,oc2b,bc1b,bc2b 
+      s1b,s2b,s3b,s4b,so4b,oc1b,oc2b,bc1b,bc2b
   real(r_kind),dimension(lat1,lon1,nsig):: d1c,d2c,d3c,d4c,d5c, &
       s1c,s2c,s3c,s4c,so4c,oc1c,oc2c,bc1c,bc2c
 
@@ -49,12 +50,12 @@ subroutine horizsc_aerosol(numcases,mype)
   eight=8.0_r_kind
   quarter=0.25_r_kind
 
-  d1c=zero ; d2c=zero ; d3c=zero ; d4c=zero ; d5c=zero ; 
-  s1c=zero ; s2c=zero ; s3c=zero ; s4c=zero ; so4c=zero ; 
+  d1c=zero ; d2c=zero ; d3c=zero ; d4c=zero ; d5c=zero ;
+  s1c=zero ; s2c=zero ; s3c=zero ; s4c=zero ; so4c=zero ;
   oc1c=zero ; oc2c=zero ; bc1c=zero ; bc2c=zero
 
-  d1lap=zero ; d2lap=zero ; d3lap=zero ; d4lap=zero ; d5lap=zero ; 
-  s1lap=zero ; s2lap=zero ; s3lap=zero ; s4lap=zero ; so4lap=zero ; 
+  d1lap=zero ; d2lap=zero ; d3lap=zero ; d4lap=zero ; d5lap=zero ;
+  s1lap=zero ; s2lap=zero ; s3lap=zero ; s4lap=zero ; so4lap=zero ;
   oc1lap=zero ; oc2lap=zero ; bc1lap=zero ; bc2lap=zero
 
   open(filunit1,form='unformatted',action='read')
@@ -471,5 +472,5 @@ subroutine horizsc_aerosol(numcases,mype)
   call mpi_bcast(bc1hln,nlat*nsig,mpi_rtype,mype_work,mpi_comm_world,ierror)
   call mpi_bcast(bc2hln,nlat*nsig,mpi_rtype,mype_work,mpi_comm_world,ierror)
 
-  return 
+  return
 end subroutine horizsc_aerosol

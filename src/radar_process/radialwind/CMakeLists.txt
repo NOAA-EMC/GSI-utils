@@ -14,7 +14,7 @@ list(APPEND _targets
   bufr_encode_radarbufr.x)
 
 foreach(_tgt ${_targets})
-  target_link_libraries(${_tgt} PRIVATE bufr::bufr_d)
+  target_link_libraries(${_tgt} PRIVATE bufr::bufr_4)
 endforeach()
 
 install(TARGETS ${_targets} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

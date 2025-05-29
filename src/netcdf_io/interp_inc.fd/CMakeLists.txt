@@ -9,7 +9,6 @@ target_link_libraries(interp_inc.x PRIVATE NetCDF::NetCDF_Fortran)
 target_link_libraries(interp_inc.x PRIVATE MPI::MPI_Fortran)
 target_link_libraries(interp_inc.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(interp_inc.x PRIVATE ip::ip_d)
-target_link_libraries(interp_inc.x PRIVATE sp::sp_d)
 
 if(ip_VERSION VERSION_GREATER_EQUAL 4.0.0)
    target_compile_definitions(interp_inc.x PRIVATE "IP_V4")

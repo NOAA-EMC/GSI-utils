@@ -20,7 +20,7 @@ target_link_libraries(getsfcnstensupdp.x PRIVATE bacio::bacio_4)
 target_link_libraries(getsfcnstensupdp.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(getsfcnstensupdp.x PRIVATE nemsio::nemsio)
 target_link_libraries(getsfcnstensupdp.x PRIVATE sfcio::sfcio)
-target_link_libraries(getsfcnstensupdp.x PRIVATE sp::sp_4)
+target_link_libraries(getsfcnstensupdp.x PRIVATE ip::ip_d)
 
 # Install executable targets
 install(TARGETS getsfcnstensupdp.x RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

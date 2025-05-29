@@ -15,7 +15,7 @@ program getsigensstatp
 !
 ! program history log:
 !   2014-08-23  Initial version.
-!   2018-07-21  Add hydrometeor (optional) 
+!   2018-07-21  Add hydrometeor (optional)
 !
 ! usage:
 !   input files:
@@ -29,6 +29,7 @@ program getsigensstatp
 
     use netcdf
     use mpi
+    use sp_mod, only: sptezv, sptez, splat
     use sigio_module,  only: sigio_head,sigio_data,sigio_srohdc, &
                              sigio_axdata,sigio_sclose
     use nemsio_module, only: nemsio_init,nemsio_open,nemsio_close, &
@@ -46,7 +47,7 @@ program getsigensstatp
     integer,parameter :: iunit=21
     integer,parameter :: idrt=4
 ! Declare externals
-    external :: w3tagb, splat, sptez, sptezv, w3tage
+    external :: w3tagb, w3tage
     character(nemsio_charkind8) :: dtype
     character(len=3)   :: charnanal
     character(len=500) :: filenamein,datapath,filepref
@@ -276,7 +277,7 @@ program getsigensstatp
                 call nemsio_readrecv(gfile,'spfh', 'mid layer',k,rwork_mem(:,krecq),   iret=iret)
                 call nemsio_readrecv(gfile,'o3mr', 'mid layer',k,rwork_mem(:,krecoz),  iret=iret)
                 call nemsio_readrecv(gfile,'clwmr','mid layer',k,rwork_mem(:,kreccwmr),iret=iret)
-              ! if ( do_icmr ) call nemsio_readrecv(gfile,'icmr', 'mid layer',k,rwork_mem(:,krecicmr),iret=iret) 
+              ! if ( do_icmr ) call nemsio_readrecv(gfile,'icmr', 'mid layer',k,rwork_mem(:,krecicmr),iret=iret)
                 if ( do_hydro ) then
                    call nemsio_readrecv(gfile,'icmr', 'mid layer',k,rwork_mem(:,krecicmr),   iret=iret)
                    call nemsio_readrecv(gfile,'rwmr', 'mid layer',k,rwork_mem(:,krecrwmr),   iret=iret)
@@ -288,7 +289,7 @@ program getsigensstatp
             call nemsio_close(gfile,iret=iret)
 
         elseif ( ncio ) then
-           call read_vardata(dset,'pressfc',values_2d) 
+           call read_vardata(dset,'pressfc',values_2d)
            rwork_mem(:,1) = reshape(values_2d,(/npts/))
            deallocate(values_2d)
            call read_vardata(dset,'ugrd',values_3d)

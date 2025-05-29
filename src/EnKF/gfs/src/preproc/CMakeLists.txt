@@ -14,7 +14,7 @@ list(APPEND _targets
   enspreproc.x)
 
 foreach(_tgt ${_targets})
-  target_link_libraries(${_tgt} PRIVATE sp::sp_4)
+  target_link_libraries(${_tgt} PRIVATE ip::ip_4)
   target_link_libraries(${_tgt} PRIVATE sigio::sigio)
   if(OpenMP_Fortran_FOUND)
      target_link_libraries(${_tgt} PRIVATE OpenMP::OpenMP_Fortran)
