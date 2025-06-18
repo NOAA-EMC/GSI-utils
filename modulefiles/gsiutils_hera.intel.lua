@@ -21,4 +21,8 @@ load(pathJoin("prod_util", prod_util_ver))
 pushenv("CFLAGS", "-xHOST")
 pushenv("FFLAGS", "-xHOST")
 
+setenv("CC","mpiicc")
+setenv("CXX","mpiicpc")
+setenv("FC","mpiifort")
+
 whatis("Description: GSI utilities environment on Hera with Intel Compilers")
