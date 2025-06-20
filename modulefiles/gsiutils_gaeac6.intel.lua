@@ -18,6 +18,8 @@ load("gsiutils_common")
 
 load(pathJoin("prod_util", prod_util_ver))
 
+unload("cray-libsci")
+
 pushenv("CFLAGS", "-xHOST")
 pushenv("FFLAGS", "-xHOST")
 
