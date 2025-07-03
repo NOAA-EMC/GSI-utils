@@ -29,7 +29,7 @@ target_link_libraries(calcstats_aero.x PRIVATE MPI::MPI_Fortran)
 target_link_libraries(calcstats_aero.x PRIVATE ${LAPACK_LIBRARIES})
 target_link_libraries(calcstats_aero.x PRIVATE bacio::bacio_4)
 target_link_libraries(calcstats_aero.x PRIVATE w3emc::w3emc_d)
-target_link_libraries(calcstats_aero.x PRIVATE sp::sp_4)
+target_link_libraries(calcstats_aero.x PRIVATE ip::ip_4)
 target_link_libraries(calcstats_aero.x PRIVATE nemsio::nemsio)
 
 install(TARGETS calcstats_aero.x RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

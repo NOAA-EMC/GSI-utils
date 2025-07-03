@@ -6,9 +6,9 @@ program adderrspec_nmcmeth
 ! prgmmr: whitaker         org: esrl/psd               date: 2009-02-23
 !
 ! abstract:  Add samples of 48-24 forecast differences with a
-!            a specified amplitude and zero mean to analysis ensemle. 
-!            Initial dates for forecasts are read in from dates.dat 
-!            (this file must be created beforehand). Ensemble perts 
+!            a specified amplitude and zero mean to analysis ensemle.
+!            Initial dates for forecasts are read in from dates.dat
+!            (this file must be created beforehand). Ensemble perts
 !            are smoothed, ens mean written out.
 !
 ! program history log:
@@ -34,6 +34,7 @@ program adderrspec_nmcmeth
 !$$$
 
   use sigio_module
+  use sp_mod, only: sppad
   use nemsio_module, only:  nemsio_init,nemsio_open,nemsio_close
   use nemsio_module, only:  nemsio_gfile,nemsio_getfilehead,&
        nemsio_readrec,nemsio_writerec,nemsio_readrecv,nemsio_writerecv
@@ -45,10 +46,10 @@ program adderrspec_nmcmeth
 ! Declare externals
   external :: mpi_init, mpi_comm_rank, mpi_comm_size, w3tagb, mpi_abort, mpi_comm_group, &
       mpi_group_incl, mpi_comm_create, mpi_barrier, copy_sigdata, mpi_allreduce, &
-      sppad, smooth, w3tage, mpi_finalize
-  
+      smooth, w3tage, mpi_finalize
+
   logical :: meanonly,lexist,nemsio,sigio
-  
+
   character(len=3)   :: charnanal
   character(len=4)   :: string
   character(len=10)  :: datestring, datestringpert
@@ -87,7 +88,7 @@ program adderrspec_nmcmeth
   call mpi_init(iret)
   call mpi_comm_rank(mpi_comm_world,mype,iret)
   call mpi_comm_size(mpi_comm_world,npe,iret)
-  
+
   if (mype==0) call w3tagb('ADDERRSPEC_NMCMETH',2011,0319,0055,'NP25')
 
 ! Get command line arguments
@@ -127,7 +128,7 @@ program adderrspec_nmcmeth
      write(6,*)' npert= ',npert,' meanonly ',meanonly
      write(6,*)' window= ',window
   endif
-  
+
   if (npe < nanals) then
      write(6,*)'***ERROR** npe=',npe,' too small.  nanals=',nanals
      flush(6)
@@ -156,13 +157,13 @@ program adderrspec_nmcmeth
      write(6,*)'***ERROR*** after mpi_comm_create with iret=',iret
      call mpi_abort(mpi_comm_world,101,iret)
   endif
-  
-! Generate random numbers to select perturbations.  
+
+! Generate random numbers to select perturbations.
 ! Use analysis date as random seed
   rseed = 1.0e6_8*iadate(1) + 1.0e4_8*iadate(2) + 1.0e2_8*iadate(3) + iadate(4)
   iseed = rseed
   call random_setseed(iseed)
-  
+
 ! Generate random number and map into range
   allocate(rwork(nanals),iwork(nanals))
   call random_number(rwork)
@@ -174,7 +175,7 @@ program adderrspec_nmcmeth
 ! Randomize dates (done on single task)
   if (mype == 0) then
      allocate(datepert(npert))
-     
+
 !    Read file with sequential pertubration dates.
      open(9,form='formatted',file='dates_seq.dat')
      do i=1,npert
@@ -182,7 +183,7 @@ program adderrspec_nmcmeth
      end do
      close(9)
      write(6,*)'perturbation dates range from ',datepert(1),' to ',datepert(npert)
-     
+
 !    Write file with randomized perturbation dates.
      write(6,*)'iseed=',iseed,' nanals=',nanals,' npert=',npert
      open(59,form='formatted',file='dates_ran.dat')
@@ -314,7 +315,7 @@ program adderrspec_nmcmeth
         sigdataim%t  = rnanals*sigdataim%t
         sigdataim%q  = rnanals*sigdataim%q
         sigdataim%ps = rnanals*sigdataim%ps
-        
+
 !       Write out ensemble mean from task 0
         if (mype == 0) then
            sigheadim%iens(1) = 1 ! unperturbed control
@@ -356,7 +357,7 @@ program adderrspec_nmcmeth
         deallocate(rwork1d)
         deallocate(swork1d)
         deallocate(twork1d)
-           
+
      endif
 
 ! Jump here if more mpi processors than files to process
@@ -379,10 +380,10 @@ program adderrspec_nmcmeth
         enddo
         close(9)
         filenamepert = trim(datapath)//'sigf48_f24.gfs.'//trim(datestringpert)
-        
+
         call sigio_srohdc(iunitsf,trim(filenamepert),sigheadpin,sigdatapin,iret)
         write(6,*)'member=',trim(filenamein),'   perturbation=',trim(filenamepert)
-        
+
         if (iret /= 0) then
            write(6,*)'***ERROR*** problem opening ',trim(filenamepert),' iret=',iret
            flush(6)
@@ -390,7 +391,7 @@ program adderrspec_nmcmeth
            call mpi_abort(mpi_comm_world,101,iret)
            stop
         end if
-        
+
         write(6,*) 'compare resolution, jcapout, jcappert = ',sigheado%jcap,sigheadpin%jcap
 
 !       Change resolution of spectral perturbations if necessary
@@ -469,14 +470,14 @@ program adderrspec_nmcmeth
         sigdatap%t  = sigdatai%t - sigdataim%t + sigdatap%t
         sigdatap%q  = sigdatai%q - sigdataim%q + sigdatap%q
         sigdatap%ps = sigdatai%ps - sigdataim%ps + sigdatap%ps
-        
+
 !       Optionally smooth perturbations
         if (maxval(smoothparm) > 0) then
            if (mype == 0) write(6,*)'call smooth'
            call smooth(sigdatap%z,ntrunc,nlevs,smoothparm,window)
            call smooth(sigdatap%d,ntrunc,nlevs,smoothparm,window)
            call smooth(sigdatap%t,ntrunc,nlevs,smoothparm,window)
-           
+
 !       Only smooth q field?  this is what's done in getsigensmeanp_smooth.f90
 !       call smooth(sigdatap%q,ntrunc,nlevs,smoothparm,window)
            do k=1,ntrac
@@ -540,7 +541,7 @@ program adderrspec_nmcmeth
      write(91,*) datestring
      close(91)
   endif
-  
+
 end program adderrspec_nmcmeth
 
 subroutine smooth(specdat,ntrunc,nlevs,smoothparm,window)
