@@ -21,6 +21,7 @@ subroutine readpairs(npe,mype,numcases)
   use module_ncio, only: Dataset, Variable, Dimension, open_dataset,&
                          get_idate_from_time_units,&
                          read_attribute, close_dataset, get_dim, read_vardata
+  use sp_mod, only: splaplac
 
   implicit none
   include 'mpif.h'
@@ -74,7 +75,7 @@ subroutine readpairs(npe,mype,numcases)
 
   z4all  = 0.0
   z4all2 = 0.0
-  
+
   if (use_gfs_nemsio .or. use_gfs_ncio) then
      nfields = 1+5*nsig !ps, (u,v), t, q, oz, cw
      allocate(taskid(nfields))
@@ -201,7 +202,7 @@ subroutine readpairs(npe,mype,numcases)
            call sptezv_sin(z4all2(:,nsig+k),z4all2(:,k),grid1in,grid2in,-1)
         end if
      end do
-     
+
      ! need to improve in the future
      ! broadcast the data on various processors to all processors
      icount = 0
@@ -262,10 +263,10 @@ subroutine readpairs(npe,mype,numcases)
         z42,spec_send(mm1),mpi_rtype,0,mpi_comm_world,ierror)
 
      call mpi_barrier(mpi_comm_world,iret2)
-     
+
      call nemsio_close(gfile1,iret=iret)
      call nemsio_close(gfile2,iret=iret)
-   
+
   else if (use_gfs_ncio) then
      if (mype==0)  write(6,*)'reading from', trim(filename(na(n)))
      dset1 = open_dataset(trim(adjustl(filename(na(n)))),errcode=iret)
@@ -343,7 +344,7 @@ subroutine readpairs(npe,mype,numcases)
            endif
            grid1in = values_3d_1(:,:,1)
            grid2in = values_3d_2(:,:,1)
-           if ( iret == 0 ) then 
+           if ( iret == 0 ) then
               ! if icmr exists, add ice to cloud water to get total condensate
               grid1in = grid1in + values_3d_3(:,:,1)
               grid2in = grid2in + values_3d_4(:,:,1)
@@ -369,7 +370,7 @@ subroutine readpairs(npe,mype,numcases)
         end if
      end do
      call mpi_barrier(mpi_comm_world,ierror)
-     
+
      ! need to improve in the future
      ! broadcast the data on various processors to all processors
      icount = 0
@@ -430,14 +431,14 @@ subroutine readpairs(npe,mype,numcases)
         z42,spec_send(mm1),mpi_rtype,0,mpi_comm_world,ierror)
 
      call mpi_barrier(mpi_comm_world,iret2)
-     
+
      call close_dataset(dset1)
      call close_dataset(dset2)
   else !if not use_gfs_nemsio and not use_gfs_ncio
      if (mype==0)  write(6,*)'opening=', inges,filename(na(n))
      if (mype==0)  write(6,*)'opening=', inge2,filename(nb(n))
 
-     ! Get spectral information from 
+     ! Get spectral information from
      if (mype==proc1)   call sigio_srohdc(inges,filename(na(n)),sighead1,sigdata1,iret)
      if (mype==proc2)   call sigio_srohdc(inge2,filename(nb(n)),sighead1,sigdata1,iret)
      call mpi_barrier(mpi_comm_world,iret2)
@@ -479,7 +480,7 @@ subroutine readpairs(npe,mype,numcases)
      if (allocated(values_3d_4)) deallocate(values_3d_4)
   endif
 
-  work1=zero ; work2=zero 
+  work1=zero ; work2=zero
 
   do k=1,nsig1o
      ! Check: Streamfunction level?

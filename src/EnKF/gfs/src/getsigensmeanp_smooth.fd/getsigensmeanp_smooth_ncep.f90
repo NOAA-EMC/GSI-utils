@@ -21,6 +21,7 @@ program getsigensmeanp_smooth
 !$$$
 
   use netcdf
+  use sp_mod, only: sptezv, sptez, splat
   use sigio_module, only: sigio_head,sigio_data,sigio_srohdc, &
                           sigio_swohdc,sigio_aldata,sigio_axdata
   use nemsio_module, only: nemsio_init,nemsio_open,nemsio_close

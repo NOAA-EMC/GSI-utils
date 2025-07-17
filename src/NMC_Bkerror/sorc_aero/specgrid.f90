@@ -1,6 +1,8 @@
 module specgrid
   use kinds, only: r_kind,r_double
   use variables, only: use_nemsio
+  use sp_mod, only: sptranf1, sptranf0, spuv2dz, spdz2uv
+  use mpi
   implicit none
 
   integer jcap,jcapin,jcapsmooth,nc,ncin,ncd2
@@ -47,7 +49,7 @@ contains
 
 !   Set other constants used in transforms
 !>swei
-    iromb=0    
+    iromb=0
 !<swei
     idrt=4
     imax=nlon
@@ -59,7 +61,6 @@ contains
     kw=2*ncd2
     jb=1
     je=(jmax+1)/2
-    jc=ncpus()
 
 !   Allocate arrays
     allocate( eps(ncd2) )
@@ -137,7 +138,7 @@ contains
 
 ! Initialize local variables
     mp=0
-    
+
     do i=1,2*(jcap+1)
       wtop(i)=0.
     end do
@@ -260,7 +261,7 @@ contains
           gridvn(ijn)=vg(i,1)
           gridvs(ijs)=vg(i,2)
         enddo
-      enddo 
+      enddo
     else
       do j=jb,je
         if(wlat(j).gt.0.) then

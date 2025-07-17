@@ -1,5 +1,6 @@
 subroutine horizsc(numcases,mype)
   use kinds, only: r_kind,i_kind
+  use sp_mod, only: splaplac, splat
   use postmod, only: smoothlat
   use variables,only: nlat,nlon,nsig,lat1,lon1,zero,&
       displs_g,ijn,db_prec,filunit1,filunit2,npe,&
@@ -143,7 +144,7 @@ subroutine horizsc(numcases,mype)
       do i=1,lat1
         ps3(i,j) = ps3(i,j) + ps1(i,j)*ps1(i,j)*r_norm
       end do
-    end do           
+    end do
   end do ! end do over numcases
   close(filunit1)
   close(filunit2)
@@ -305,5 +306,5 @@ subroutine horizsc(numcases,mype)
   call mpi_bcast(chln,nlat*nsig,mpi_rtype,mype_work,mpi_comm_world,ierror)
   call mpi_bcast(pshln,nlat,mpi_rtype,mype_work,mpi_comm_world,ierror)
 
-  return 
+  return
 end subroutine horizsc

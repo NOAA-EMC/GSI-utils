@@ -10,7 +10,7 @@ target_link_libraries(getsigensstatp.x PRIVATE MPI::MPI_Fortran)
 target_link_libraries(getsigensstatp.x PRIVATE bacio::bacio_4)
 target_link_libraries(getsigensstatp.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(getsigensstatp.x PRIVATE nemsio::nemsio)
-target_link_libraries(getsigensstatp.x PRIVATE sp::sp_4)
+target_link_libraries(getsigensstatp.x PRIVATE ip::ip_4)
 target_link_libraries(getsigensstatp.x PRIVATE sigio::sigio)
 target_link_libraries(getsigensstatp.x PRIVATE ncio::ncio)
 

@@ -10,7 +10,7 @@ target_link_libraries(getsigensmeanp_smooth.x PRIVATE MPI::MPI_Fortran)
 target_link_libraries(getsigensmeanp_smooth.x PRIVATE bacio::bacio_4)
 target_link_libraries(getsigensmeanp_smooth.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(getsigensmeanp_smooth.x PRIVATE nemsio::nemsio)
-target_link_libraries(getsigensmeanp_smooth.x PRIVATE sp::sp_4)
+target_link_libraries(getsigensmeanp_smooth.x PRIVATE ip::ip_4)
 target_link_libraries(getsigensmeanp_smooth.x PRIVATE sigio::sigio)
 target_link_libraries(getsigensmeanp_smooth.x PRIVATE ncio::ncio)
 
