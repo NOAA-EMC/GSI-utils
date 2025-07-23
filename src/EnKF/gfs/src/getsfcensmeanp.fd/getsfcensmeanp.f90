@@ -337,7 +337,8 @@ program getsfcensmeanp
               values_2d_avg = values_2d_avg * rnanals
               if (mype == 0) then
                  print *,'writing ens mean ',trim(dset%variables(nvar)%name)
-                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_2d_avg)
+                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_2d_avg,&
+                 ncstart=(/1,1,1/), nccount=(/lonb,latb,1/))
               endif
            elseif (dset%variables(nvar)%ndims == 4) then
               call read_vardata(dset,trim(dset%variables(nvar)%name),values_3d)
@@ -345,7 +346,8 @@ program getsfcensmeanp
               values_3d_avg = values_3d_avg * rnanals
               if (mype == 0) then
                  print *,'writing ens mean ',trim(dset%variables(nvar)%name)
-                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg)
+                 call write_vardata(dseto,trim(dset%variables(nvar)%name),values_3d_avg,&
+                 ncstart=(/1,1,1,1/), nccount=(/lonb,latb,levs,1/))
               endif
            else
               write(6,*)'***ERROR*** invalid ndims= ',dset%variables(nvar)%ndims,&

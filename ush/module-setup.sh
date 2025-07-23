@@ -8,11 +8,8 @@ if [[ $MACHINE_ID = jet* ]] ; then
     fi
     module purge
 elif [[ $MACHINE_ID = container* ]] ; then
-    # if ( ! eval module help > /dev/null 2>&1 ) ; then
-        source /usr/lmod/lmod/init/bash
-    # fi
+    source /usr/lmod/lmod/init/bash
     module purge
-    unset MODULEPATH
 
 elif [[ $MACHINE_ID = hera* ]] ; then
     # We are on NOAA Hera
@@ -60,7 +57,7 @@ elif [[ $MACHINE_ID = stampede* ]] ; then
     fi
     module purge
 
-elif [[ $MACHINE_ID = gaea* ]] ; then
+elif [[ $MACHINE_ID = gaeac5 ]] ; then
     # We are on GAEA.
     if ( ! eval module help > /dev/null 2>&1 ) ; then
         # We cannot simply load the module command.  The GAEA
@@ -69,6 +66,13 @@ elif [[ $MACHINE_ID = gaea* ]] ; then
         # the module command fails.  Hence we actually have to source
         # /etc/profile here.
         source /etc/profile
+    fi
+    module reset
+
+elif [[ ${MACHINE_ID} = gaeac6 ]]; then
+    # We are on GAEA C6.
+    if ( ! eval module help > /dev/null 2>&1 ) ; then
+        source /opt/cray/pe/lmod/lmod/init/bash
     fi
     module reset
 

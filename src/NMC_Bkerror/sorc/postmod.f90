@@ -1,6 +1,7 @@
 module postmod
 
    use kinds, only: r_kind,r_single
+   use sp_mod, only: splat
 
    implicit none
 

@@ -24,6 +24,7 @@ program getsfcnstensupdp
 !$$$
 
   use mpi
+  use sp_mod, only: splat
   use kinds, only: r_kind,i_kind,r_single
   use constants, only: two,half,zero,z_w_max,tfrozen,init_constants_derived,pi
   use sfcio_module, only: sfcio_srohdc,sfcio_head,sfcio_data,sfcio_swohdc
@@ -44,7 +45,7 @@ program getsfcnstensupdp
   integer(i_kind), parameter :: idrt=4
 
 ! Declare externals
-  external :: w3tagb, splat, int2_msk_glb_prep, int22_msk_glb, dtzm_2d, w3tage
+  external :: w3tagb, int2_msk_glb_prep, int22_msk_glb, dtzm_2d, w3tage
 
   character(len=80) :: fname_dtfanl,fname_nstges,fname_sfcgcy,fname_nstanl,fname_sfcanl
   character(len=3)  :: charnanal

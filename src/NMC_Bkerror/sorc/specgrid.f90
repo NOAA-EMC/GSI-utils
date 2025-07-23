@@ -1,5 +1,6 @@
 module specgrid
   use kinds, only: r_kind,r_double,i_kind
+  use sp_mod, only: sptranf0, sptranf1, spdz2uv, spuv2dz
   implicit none
 
   integer jcap,jcapin,jcapsmooth,nc,ncin,ncd2,ncd2in
@@ -20,7 +21,7 @@ contains
     implicit none
 
     integer,intent(in):: nlat,nlon,nsig
-    integer ii,ii1,l,m,ncpus
+    integer ii,ii1,l,m
     real(r_kind) zero1
 
 !   Set constants
@@ -54,7 +55,6 @@ contains
     kw=2*ncd2
     jb=1
     je=(jmax+1)/2
-    jc=ncpus()
 
 !   Allocate arrays
     allocate( eps(ncd2) )
@@ -149,7 +149,7 @@ contains
 
 ! Initialize local variables
     mp=0
-    
+
     do i=1,2*(jcap+1)
       wtop(i)=0.
     end do
@@ -476,7 +476,7 @@ subroutine sptranf_v(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
 !   spdz2uv      compute winds from divergence and vorticity
 !   spuv2dz      compute divergence and vorticity from winds
 !
-! remarks: 
+! remarks:
 !   This routine assumes that splib routine sptranf0 has been
 !   previously called.  sptranf0 initializes arrays needed in
 !   the transforms.
@@ -503,7 +503,7 @@ subroutine sptranf_v(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
 
 ! Declare local variables
   integer(i_kind) i,j,jj,ijn,ijs
-  integer(i_kind),dimension(2):: mp
+  integer(i_kind) :: mp
   real(r_kind),dimension(ncd2*2,2):: w
   real(r_kind),dimension(2*(jcap+1),2):: wtop
   real(r_kind),dimension(imax,2,2):: g
@@ -580,7 +580,7 @@ subroutine sptranf_v(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
     implicit none
 
     integer,intent(in):: nlat,nlon,nsig
-    integer ii,ii1,l,m,ncpus
+    integer ii,ii1,l,m
     real(r_kind) zero1
 
 !   Set constants
@@ -615,7 +615,6 @@ subroutine sptranf_v(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
     kwin=2*ncd2in
     jbin=1
     jein=(jmaxin+1)/2
-!    jc=ncpus()
 
 !   Allocate arrays
     allocate( epsin(ncd2in) )
@@ -710,7 +709,7 @@ subroutine sptranf_v(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
 
 ! Initialize local variables
     mp=0
-    
+
     do i=1,2*(jcapin+1)
       wtop(i)=0.
     end do
@@ -907,7 +906,7 @@ subroutine sptranf_vin(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
 !   spdz2uv      compute winds from divergence and vorticity
 !   spuv2dz      compute divergence and vorticity from winds
 !
-! remarks: 
+! remarks:
 !   This routine assumes that splib routine sptranf0 has been
 !   previously called.  sptranf0 initializes arrays needed in
 !   the transforms.
@@ -934,7 +933,7 @@ subroutine sptranf_vin(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
 
 ! Declare local variables
   integer(i_kind) i,j,jj,ijn,ijs
-  integer(i_kind),dimension(2):: mp
+  integer(i_kind) :: mp
   real(r_kind),dimension(ncd2in*2,2):: w
   real(r_kind),dimension(2*(jcapin+1),2):: wtop
   real(r_kind),dimension(imaxin,2,2):: g
@@ -1007,6 +1006,6 @@ subroutine sptranf_vin(waved,wavez,gridun,gridus,gridvn,gridvs,idir)
   endif
 
  end subroutine sptranf_vin
- 
+
 end module specgrid
 

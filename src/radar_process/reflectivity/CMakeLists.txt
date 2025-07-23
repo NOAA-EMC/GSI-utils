@@ -15,7 +15,7 @@ list(APPEND SRCS
 add_executable(process_NSSL_mosaic.x ${SRCS})
 target_link_libraries(process_NSSL_mosaic.x PRIVATE NetCDF::NetCDF_Fortran)
 target_link_libraries(process_NSSL_mosaic.x PRIVATE MPI::MPI_Fortran)
-target_link_libraries(process_NSSL_mosaic.x PRIVATE bufr::bufr_d)
+target_link_libraries(process_NSSL_mosaic.x PRIVATE bufr::bufr_4)
 
 # Install executable targets
 install(TARGETS process_NSSL_mosaic.x RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

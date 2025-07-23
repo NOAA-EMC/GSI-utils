@@ -5,8 +5,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
 endif()
 
 add_executable(makeoneobbufr.x makeoneobbufr.f90)
-target_link_libraries(makeoneobbufr.x PRIVATE bufr::bufr_d)
+target_link_libraries(makeoneobbufr.x PRIVATE bufr::bufr_4)
 
 # Install executable targets
 install(TARGETS makeoneobbufr.x RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
