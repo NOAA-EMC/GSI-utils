@@ -13,8 +13,8 @@ elif [[ $MACHINE_ID = container* ]] ; then
     fi
     module purge
 
-elif [[ $MACHINE_ID = hera* ]] ; then
-    # We are on NOAA Hera
+elif [[ $MACHINE_ID = hera* || $MACHINE_ID = ursa* ]] ; then
+    # We are on NOAA Hera or Ursa
     if ( ! eval module help > /dev/null 2>&1 ) ; then
         source /apps/lmod/lmod/init/bash
     fi
