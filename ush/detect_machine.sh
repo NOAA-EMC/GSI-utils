@@ -9,7 +9,7 @@
 # Thank you for your contribution
 
 # Overwrite auto-detect in in container
-if [[ -d /opt/spack-stack && -v SINGULARITY_CONTAINER ]]; then
+if [[ -v SINGULARITY_CONTAINER ]]; then
   MACHINE_ID=container
 fi
 
@@ -66,11 +66,6 @@ fi
 
 # Overwrite auto-detect with MACHINE if set
 MACHINE_ID=${MACHINE:-${MACHINE_ID}}
-
-# Overwrite auto-detect in in container
-if [[ -d /opt/spack-stack && -v SINGULARITY_CONTAINER ]]; then
-  MACHINE_ID=container
-fi
 
 # If MACHINE_ID is no longer UNKNNOWN, return it
 if [[ "${MACHINE_ID}" != "UNKNOWN" ]]; then
