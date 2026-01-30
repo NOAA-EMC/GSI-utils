@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the GSI-utils to get the ci/spack.yaml file
+      # Checkout the GSI-utils to get the ci/spack_gcc.yaml file
       - name: checkout
         if: steps.cache-env.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack.yaml') }}
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}
 
       # Install dependencies using Spack
       - name: install-dependencies-with-spack
