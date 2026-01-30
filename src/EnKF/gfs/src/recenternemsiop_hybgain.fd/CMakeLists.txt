@@ -6,7 +6,7 @@ endif()
 
 add_executable(recenternemsiop_hybgain.x recenternemsiop_hybgain.f90)
 target_link_libraries(recenternemsiop_hybgain.x PRIVATE MPI::MPI_Fortran)
-target_link_libraries(recenternemsiop_hybgain.x PRIVATE bacio::bacio_4)
+target_link_libraries(recenternemsiop_hybgain.x PRIVATE bacio::bacio)
 target_link_libraries(recenternemsiop_hybgain.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(recenternemsiop_hybgain.x PRIVATE nemsio::nemsio)
 

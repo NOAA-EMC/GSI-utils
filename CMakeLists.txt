@@ -101,7 +101,7 @@ find_package(bufr REQUIRED)
 find_package(wrf_io REQUIRED)
 
 # See https://github.com/NOAA-EMC/NCEPLIBS-nemsio/pull/22
-target_link_libraries(nemsio::nemsio INTERFACE w3emc::w3emc_d bacio::bacio_4)
+target_link_libraries(nemsio::nemsio INTERFACE w3emc::w3emc_d bacio::bacio)
 
 # Get compiler flags for the utilities
 include(gsiutils_compiler_flags)

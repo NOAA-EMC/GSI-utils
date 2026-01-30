@@ -14,7 +14,7 @@ list(APPEND SRCS
 add_executable(calc_analysis.x ${SRCS})
 target_link_libraries(calc_analysis.x PRIVATE NetCDF::NetCDF_Fortran)
 target_link_libraries(calc_analysis.x PRIVATE MPI::MPI_Fortran)
-target_link_libraries(calc_analysis.x PRIVATE bacio::bacio_4)
+target_link_libraries(calc_analysis.x PRIVATE bacio::bacio)
 target_link_libraries(calc_analysis.x PRIVATE nemsio::nemsio)
 target_link_libraries(calc_analysis.x PRIVATE ncio::ncio)
 target_link_libraries(calc_analysis.x PRIVATE w3emc::w3emc_4)

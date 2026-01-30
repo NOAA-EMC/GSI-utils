@@ -5,7 +5,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
 endif()
 
 add_executable(gribmean.x gribmean.f90)
-target_link_libraries(gribmean.x PRIVATE bacio::bacio_4)
+target_link_libraries(gribmean.x PRIVATE bacio::bacio)
 target_link_libraries(gribmean.x PRIVATE w3emc::w3emc_d)
 
 # Install executable targets

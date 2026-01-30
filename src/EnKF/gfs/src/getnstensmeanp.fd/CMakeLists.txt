@@ -6,7 +6,7 @@ endif()
 
 add_executable(getnstensmeanp.x getnstensmeanp.f90 nstio_module.f90)
 target_link_libraries(getnstensmeanp.x PRIVATE MPI::MPI_Fortran)
-target_link_libraries(getnstensmeanp.x PRIVATE bacio::bacio_4)
+target_link_libraries(getnstensmeanp.x PRIVATE bacio::bacio)
 target_link_libraries(getnstensmeanp.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(getnstensmeanp.x PRIVATE nemsio::nemsio)
 

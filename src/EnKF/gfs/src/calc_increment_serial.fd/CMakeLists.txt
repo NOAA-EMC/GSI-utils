@@ -17,7 +17,7 @@ list(APPEND SRCS
 add_executable(calc_increment_serial.x ${SRCS})
 target_compile_definitions(calc_increment_serial.x PRIVATE "_REAL8_")
 target_link_libraries(calc_increment_serial.x PRIVATE NetCDF::NetCDF_Fortran)
-target_link_libraries(calc_increment_serial.x PRIVATE bacio::bacio_4)
+target_link_libraries(calc_increment_serial.x PRIVATE bacio::bacio)
 target_link_libraries(calc_increment_serial.x PRIVATE w3emc::w3emc_d)
 target_link_libraries(calc_increment_serial.x PRIVATE nemsio::nemsio)
 
