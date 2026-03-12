@@ -8,6 +8,11 @@
 #
 # Thank you for your contribution
 
+# Overwrite auto-detect in in container
+if [[ -v SINGULARITY_CONTAINER ]]; then
+  MACHINE_ID=container
+fi
+
 # If the MACHINE_ID variable is set, skip this script.
 [[ -n ${MACHINE_ID:-} ]] && return
 
@@ -34,6 +39,9 @@ case $(hostname -f) in
   ufe0[1-9]) MACHINE_ID=ursa ;; ### ursa01-09
   ufe1[0-6]) MACHINE_ID=ursa ;; ### ursa10-12
   uecflow01) MACHINE_ID=ursa ;; ### ursaecflow01
+
+  der*) MACHINE_ID=derecho ;; ### derecho[1-8]
+  dec*) MACHINE_ID=derecho ;; ### decxxx computing node
 
   s4-submit.ssec.wisc.edu) MACHINE_ID=s4 ;; ### s4
 
@@ -108,6 +116,9 @@ elif [[ -d /gpfs/f6 ]]; then
 elif [[ -d /data/prod ]]; then
   # We are on SSEC's S4
   MACHINE_ID=s4
+elif [[ -d /gpfs/csfs1 ]]; then
+  # We are on NCAR DERECHO.
+  MACHINE_ID=derecho
 else
   echo WARNING: UNKNOWN PLATFORM 1>&2
 fi
