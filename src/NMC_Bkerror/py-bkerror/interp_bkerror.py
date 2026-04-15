@@ -111,9 +111,10 @@ print('Interpolate from %d to %d' % (gsi.nlat, gsi_n.nlat))
 
 def _interp2d(x, y, z, kind='linear'):
     '''2D interpolation replacing deprecated scipy.interpolate.interp2d.
-    x: 1D array of column coordinates
+    x: 1D array of column coordinates (must be strictly ascending)
     y: 1D array of row coordinates (must be strictly ascending)
     z: 2D array of shape (len(y), len(x))
+    kind: interpolation method - 'linear' or 'cubic' (requires scipy >= 1.9)
     Returns a callable f(x_new, y_new) producing shape (len(y_new), len(x_new)).
     '''
     f = RegularGridInterpolator((y, x), z, method=kind, bounds_error=False, fill_value=None)
