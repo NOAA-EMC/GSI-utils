@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -10,8 +10,8 @@ try:
     import lib_mapping as lmapping
     plot_map = True
 except:
-    print 'lib_mapping module is not in your path'
-    print 'No maps will be produced'
+    print('lib_mapping module is not in your path')
+    print('No maps will be produced')
     plot_map = False
 
 
@@ -25,7 +25,7 @@ class GSIbkgerr(object):
         '''
         nsig,nlat,nlon = bkerror.get_header(filename)
         ivar,agvin,bgvin,wgvin,corzin,hscalesin,vscalesin,corq2in,corsstin,hsstin,corpin,hscalespin = bkerror.get_bkerror(filename,nsig,nlat,nlon)
-        var = (ivar.tostring()).replace('\x00','')[:-1].split('|')
+        var = ivar.tobytes().decode('ascii').replace('\x00','')[:-1].split('|')
 
         self.filename = filename
 
@@ -56,22 +56,22 @@ class GSIbkgerr(object):
         Print a summary of the GSI background error file
         '''
 
-        print
-        print 'file = %s' % self.filename
-        print 'nsig = %d, nlat = %d, nlon = %d, nvar = %d' % (self.nsig,self.nlat,self.nlon,len(self.var))
-        print 'variables = %s' % ', '.join(self.var)
-        print 'agv.shape: ', self.agvin.shape
-        print 'bgv.shape: ', self.bgvin.shape
-        print 'wgv.shape: ', self.wgvin.shape
-        print 'corz.shape: ', self.corzin.shape
-        print 'hscales.shape: ', self.hscalesin.shape
-        print 'vscales.shape: ', self.vscalesin.shape
-        print 'corq2.shape: ', self.corq2in.shape
-        print 'corsst.shape: ', self.corsstin.shape
-        print 'hsst.shape: ', self.hsstin.shape
-        print 'corp.shape: ', self.corpin.shape
-        print 'hscalesp.shape: ', self.hscalespin.shape
-        print
+        print()
+        print('file = %s' % self.filename)
+        print('nsig = %d, nlat = %d, nlon = %d, nvar = %d' % (self.nsig,self.nlat,self.nlon,len(self.var)))
+        print('variables = %s' % ', '.join(self.var))
+        print('agv.shape: ', self.agvin.shape)
+        print('bgv.shape: ', self.bgvin.shape)
+        print('wgv.shape: ', self.wgvin.shape)
+        print('corz.shape: ', self.corzin.shape)
+        print('hscales.shape: ', self.hscalesin.shape)
+        print('vscales.shape: ', self.vscalesin.shape)
+        print('corq2.shape: ', self.corq2in.shape)
+        print('corsst.shape: ', self.corsstin.shape)
+        print('hsst.shape: ', self.hsstin.shape)
+        print('corp.shape: ', self.corpin.shape)
+        print('hscalesp.shape: ', self.hscalespin.shape)
+        print()
 
         return
 
@@ -97,7 +97,7 @@ cmappos = 'Spectral_r'
 
 aglevs = [1,10,20,40,50,60]
 for lev in aglevs:
-    print 'plotting agv at level = %d'  % lev
+    print('plotting agv at level = %d'  % lev)
     plt.figure()
     z = gsi.agvin[:,:,lev-1]
     plt.contourf(xg,zg,z,21,vmin=-z.max(),cmap=cmapdiv,extend='both')
@@ -106,7 +106,7 @@ for lev in aglevs:
     plt.savefig('agvl%02d.pdf' % lev)
 
 
-print 'plotting bgv and wgv'
+print('plotting bgv and wgv')
 plt.figure()
 plt.subplot(2,1,1)
 plt.contourf(xg,zg,gsi.bgvin,21,vmin=-gsi.bgvin.max(),cmap=cmapdiv,extend='both')
@@ -122,7 +122,7 @@ for i in range(6):
 
     varname = gsi.var[i].strip()
 
-    print 'plotting %s'  % varname
+    print('plotting %s'  % varname)
 
     plt.figure()
     plt.subplot(3,1,1)
@@ -146,7 +146,7 @@ for i in range(6):
     plt.suptitle('variable = %s' % varname,fontsize=14,fontweight='bold')
     plt.savefig('%s.pdf' % varname)
 
-print 'plotting corq2'
+print('plotting corq2')
 plt.figure()
 plt.subplot(1,1,1)
 z = gsi.corq2in
@@ -155,7 +155,7 @@ plt.colorbar()
 plt.title('corq2',fontsize=12,fontweight='normal')
 plt.savefig('corq2.pdf')
 
-print 'plotting surface pressure'
+print('plotting surface pressure')
 plt.figure()
 plt.subplot(1,2,1)
 plt.plot(glat,gsi.corpin,'b.')
@@ -181,7 +181,7 @@ if plot_map:
     gglon,gglat = np.meshgrid(glon,glat)
     xm,ym = bmap(gglon,gglat)
 
-    print 'plotting sst'
+    print('plotting sst')
     plt.figure()
     plt.subplot(2,1,1)
     lmapping.drawMap(bmap,proj)

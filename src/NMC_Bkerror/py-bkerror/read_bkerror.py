@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -14,7 +14,7 @@ class GSIbkgerr(object):
         '''
         nsig,nlat,nlon = bkerror.get_header(filename)
         ivar,agvin,bgvin,wgvin,corzin,hscalesin,vscalesin,corq2in,corsstin,hsstin,corpin,hscalespin = bkerror.get_bkerror(filename,nsig,nlat,nlon)
-        var = (ivar.tostring()).replace('\x00','')[:-1].split('|')
+        var = ivar.tobytes().decode('ascii').replace('\x00','')[:-1].split('|')
 
         self.filename = filename
 
@@ -45,22 +45,22 @@ class GSIbkgerr(object):
         Print a summary of the GSI background error file
         '''
 
-        print
-        print 'file = %s' % self.filename
-        print 'nsig = %d, nlat = %d, nlon = %d, nvar = %d' % (self.nsig,self.nlat,self.nlon,len(self.var))
-        print 'variables = %s' % ', '.join(self.var)
-        print 'agv.shape: ', self.agvin.shape
-        print 'bgv.shape: ', self.bgvin.shape
-        print 'wgv.shape: ', self.wgvin.shape
-        print 'corz.shape: ', self.corzin.shape
-        print 'hscales.shape: ', self.hscalesin.shape
-        print 'vscales.shape: ', self.vscalesin.shape
-        print 'corq2.shape: ', self.corq2in.shape
-        print 'corsst.shape: ', self.corsstin.shape
-        print 'hsst.shape: ', self.hsstin.shape
-        print 'corp.shape: ', self.corpin.shape
-        print 'hscalesp.shape: ', self.hscalespin.shape
-        print
+        print()
+        print('file = %s' % self.filename)
+        print('nsig = %d, nlat = %d, nlon = %d, nvar = %d' % (self.nsig,self.nlat,self.nlon,len(self.var)))
+        print('variables = %s' % ', '.join(self.var))
+        print('agv.shape: ', self.agvin.shape)
+        print('bgv.shape: ', self.bgvin.shape)
+        print('wgv.shape: ', self.wgvin.shape)
+        print('corz.shape: ', self.corzin.shape)
+        print('hscales.shape: ', self.hscalesin.shape)
+        print('vscales.shape: ', self.vscalesin.shape)
+        print('corq2.shape: ', self.corq2in.shape)
+        print('corsst.shape: ', self.corsstin.shape)
+        print('hsst.shape: ', self.hsstin.shape)
+        print('corp.shape: ', self.corpin.shape)
+        print('hscalesp.shape: ', self.hscalespin.shape)
+        print()
 
         return
 
