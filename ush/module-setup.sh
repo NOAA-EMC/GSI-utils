@@ -7,8 +7,15 @@ if [[ $MACHINE_ID = jet* ]] ; then
         source /apps/lmod/lmod/init/bash
     fi
     module purge
+
 elif [[ $MACHINE_ID = container* ]] ; then
     source /usr/lmod/lmod/init/bash
+    module purge
+
+elif [[ $MACHINE_ID = aws-ec2* ]] ; then
+    if ( ! eval module help > /dev/null 2>&1 ) ; then
+        source /usr/share/lmod/lmod/init/bash
+    fi
     module purge
 
 elif [[ $MACHINE_ID = hera* || $MACHINE_ID = ursa* ]] ; then

@@ -45,6 +45,10 @@ case $(hostname -f) in
 
   s4-submit.ssec.wisc.edu) MACHINE_ID=s4 ;; ### s4
 
+  ip-*) MACHINE_ID=aws-ec2 ;; ### aws-ec2
+  compute-dy-*) MACHINE_ID=aws-ec2 ;; ### aws-ec2
+  processing-dy-*) MACHINE_ID=aws-ec2 ;; ### aws-ec2
+
   fe[1-8]) MACHINE_ID=jet ;; ### jet01-8
   tfe[12]) MACHINE_ID=jet ;; ### tjet1-2
 
@@ -76,7 +80,11 @@ if [[ "${MACHINE_ID}" != "UNKNOWN" ]]; then
 fi
 
 # Try searching based on paths since hostname may not match on compute nodes
-if [[ -d /lfs/h3 ]]; then
+if [[ -v SINGULARITY_NAME ]]; then
+  MACHINE_ID=container
+elif [[ -d /opt/spack-stack && -d /lustre ]]; then
+  MACHINE_ID=aws-ec2
+elif [[ -d /lfs/h3 ]]; then
   # We are on NOAA Cactus or Dogwood
   MACHINE_ID=wcoss2
 elif [[ -d /lfs/h1 && ! -d /lfs/h3 ]]; then
