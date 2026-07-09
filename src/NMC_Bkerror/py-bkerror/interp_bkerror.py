@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import numpy as np
-from scipy.interpolate import interp1d, interp2d
+from scipy.interpolate import interp1d, RegularGridInterpolator
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from bkerror import bkerror
 from splat import splat
@@ -18,7 +18,7 @@ class GSIbkgerr(object):
         '''
         nsig,nlat,nlon = bkerror.get_header(filename)
         ivar,agvin,bgvin,wgvin,corzin,hscalesin,vscalesin,corq2in,corsstin,hsstin,corpin,hscalespin = bkerror.get_bkerror(filename,nsig,nlat,nlon)
-        var = (ivar.tostring()).replace('\x00','')[:-1].split('|')
+        var = ivar.tobytes().decode('ascii').replace('\x00','')[:-1].split('|')
 
         self.filename = filename
 
@@ -49,22 +49,22 @@ class GSIbkgerr(object):
         Print a summary of the GSI background error file
         '''
 
-        print
-        print 'file = %s' % self.filename
-        print 'nsig = %d, nlat = %d, nlon = %d, nvar = %d' % (self.nsig,self.nlat,self.nlon,len(self.var))
-        print 'variables = %s' % ', '.join(self.var)
-        print 'agv.shape: ', self.agvin.shape
-        print 'bgv.shape: ', self.bgvin.shape
-        print 'wgv.shape: ', self.wgvin.shape
-        print 'corz.shape: ', self.corzin.shape
-        print 'hscales.shape: ', self.hscalesin.shape
-        print 'vscales.shape: ', self.vscalesin.shape
-        print 'corq2.shape: ', self.corq2in.shape
-        print 'corsst.shape: ', self.corsstin.shape
-        print 'hsst.shape: ', self.hsstin.shape
-        print 'corp.shape: ', self.corpin.shape
-        print 'hscalesp.shape: ', self.hscalespin.shape
-        print
+        print()
+        print('file = %s' % self.filename)
+        print('nsig = %d, nlat = %d, nlon = %d, nvar = %d' % (self.nsig,self.nlat,self.nlon,len(self.var)))
+        print('variables = %s' % ', '.join(self.var))
+        print('agv.shape: ', self.agvin.shape)
+        print('bgv.shape: ', self.bgvin.shape)
+        print('wgv.shape: ', self.wgvin.shape)
+        print('corz.shape: ', self.corzin.shape)
+        print('hscales.shape: ', self.hscalesin.shape)
+        print('vscales.shape: ', self.vscalesin.shape)
+        print('corq2.shape: ', self.corq2in.shape)
+        print('corsst.shape: ', self.corsstin.shape)
+        print('hsst.shape: ', self.hsstin.shape)
+        print('corp.shape: ', self.corpin.shape)
+        print('hscalesp.shape: ', self.hscalespin.shape)
+        print()
 
         return
 
@@ -107,53 +107,68 @@ glat_n,wlat_n = splat(idrt,gsi_n.nlat)
 slon_n = np.linspace(0.,360.,gsi_n.nlon,endpoint=False)
 slat_n = 180. / np.arccos(-1.) * np.arcsin(glat_n[::-1])
 
-print 'Interpolate from %d to %d' % (gsi.nlat, gsi_n.nlat)
+print('Interpolate from %d to %d' % (gsi.nlat, gsi_n.nlat))
+
+def _interp2d(x, y, z, kind='linear'):
+    '''2D interpolation replacing deprecated scipy.interpolate.interp2d.
+    x: 1D array of column coordinates (must be strictly ascending)
+    y: 1D array of row coordinates (must be strictly ascending)
+    z: 2D array of shape (len(y), len(x))
+    kind: interpolation method - 'linear' or 'cubic' (requires scipy >= 1.9)
+    Returns a callable f(x_new, y_new) producing shape (len(y_new), len(x_new)).
+    '''
+    f = RegularGridInterpolator((y, x), z, method=kind, bounds_error=False, fill_value=None)
+    def wrapper(x_new, y_new):
+        yy, xx = np.meshgrid(y_new, x_new, indexing='ij')
+        pts = np.column_stack([yy.ravel(), xx.ravel()])
+        return f(pts).reshape(len(y_new), len(x_new))
+    return wrapper
 
 tmp = gsi.agvin.reshape(gsi.nlat,-1)
-f = interp2d(ssig2,slat,tmp,kind=interp_kind)
+f = _interp2d(ssig2,slat,tmp,kind=interp_kind)
 tmp_n = f(ssig2,slat_n)
 gsi_n.agvin = np.array(tmp_n.reshape(gsi_n.nlat,gsi_n.nsig,gsi_n.nsig),dtype=np.float32)
 
-f = interp2d(ssig,slat,gsi.bgvin,kind=interp_kind)
+f = _interp2d(ssig,slat,gsi.bgvin,kind=interp_kind)
 tmp_n = f(ssig,slat_n)
 gsi_n.bgvin = np.array(tmp_n,dtype=np.float32)
 
-f = interp2d(ssig,slat,gsi.wgvin,kind=interp_kind)
+f = _interp2d(ssig,slat,gsi.wgvin,kind=interp_kind)
 tmp_n = f(ssig,slat_n)
 gsi_n.wgvin = np.array(tmp_n,dtype=np.float32)
 
 tmp = gsi.corzin.reshape(gsi.nlat,-1)
-f = interp2d(ssig3,slat,tmp,kind=interp_kind)
+f = _interp2d(ssig3,slat,tmp,kind=interp_kind)
 tmp_n = f(ssig3,slat_n)
 gsi_n.corzin = np.array(tmp_n.reshape(gsi_n.nlat,gsi_n.nsig,6),dtype=np.float32)
 
 tmp = gsi.hscalesin.reshape(gsi.nlat,-1)
-f = interp2d(ssig3,slat,tmp,kind=interp_kind)
+f = _interp2d(ssig3,slat,tmp,kind=interp_kind)
 tmp_n = f(ssig3,slat_n)
 gsi_n.hscalesin = np.array(tmp_n.reshape(gsi_n.nlat,gsi_n.nsig,6),dtype=np.float32)
 
 tmp = gsi.vscalesin.reshape(gsi.nlat,-1)
-f = interp2d(ssig3,slat,tmp,kind=interp_kind)
+f = _interp2d(ssig3,slat,tmp,kind=interp_kind)
 tmp_n = f(ssig3,slat_n)
 gsi_n.vscalesin = np.array(tmp_n.reshape(gsi_n.nlat,gsi_n.nsig,6),dtype=np.float32)
 
-f = interp2d(ssig,slat,gsi.corq2in,kind=interp_kind)
+f = _interp2d(ssig,slat,gsi.corq2in,kind=interp_kind)
 tmp_n = f(ssig,slat_n)
 gsi_n.corq2in = np.array(tmp_n,dtype=np.float32)
 
-f = interp2d(slon,slat,gsi.corsstin,kind=interp_kind)
+f = _interp2d(slon,slat,gsi.corsstin,kind=interp_kind)
 tmp_n = f(slon_n,slat_n)
 gsi_n.corsstin = np.array(tmp_n,dtype=np.float32)
 
-f = interp2d(slon,slat,gsi.hsstin,kind=interp_kind)
+f = _interp2d(slon,slat,gsi.hsstin,kind=interp_kind)
 tmp_n = f(slon_n,slat_n)
 gsi_n.hsstin = np.array(tmp_n,dtype=np.float32)
 
-f = interp1d(slat.astype(np.float),gsi.corpin.astype(np.float),kind=interp_kind,fill_value="extrapolate")
+f = interp1d(slat.astype(float),gsi.corpin.astype(float),kind=interp_kind,fill_value="extrapolate")
 tmp_n = f(slat_n)
 gsi_n.corpin = np.array(tmp_n,dtype=np.float32)
 
-f = interp1d(slat.astype(np.float),gsi.hscalespin.astype(np.float),kind=interp_kind,fill_value="extrapolate")
+f = interp1d(slat.astype(float),gsi.hscalespin.astype(float),kind=interp_kind,fill_value="extrapolate")
 tmp_n = f(slat_n)
 gsi_n.hscalespin = np.array(tmp_n,dtype=np.float32)
 
@@ -169,8 +184,8 @@ bkerror.put_bkerror(gsi_n.filename,gsi_n.ivar,\
 gsi_rn = GSIbkgerr(gsi_n.filename)
 gsi_rn.print_summary()
 
-print 'differences'
-print np.abs(gsi_n.agvin-gsi_rn.agvin).max()
-print np.abs(gsi_n.bgvin-gsi_rn.bgvin).max()
-print np.abs(gsi_n.wgvin-gsi_rn.wgvin).max()
-print np.abs(gsi_n.hscalesin-gsi_rn.hscalesin).max()
+print('differences')
+print(np.abs(gsi_n.agvin-gsi_rn.agvin).max())
+print(np.abs(gsi_n.bgvin-gsi_rn.bgvin).max())
+print(np.abs(gsi_n.wgvin-gsi_rn.wgvin).max())
+print(np.abs(gsi_n.hscalesin-gsi_rn.hscalesin).max())

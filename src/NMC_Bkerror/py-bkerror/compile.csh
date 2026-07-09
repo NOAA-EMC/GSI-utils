@@ -18,6 +18,9 @@ else if ( $compiler == "intel" ) then
 else if ( $compiler == "intelem" ) then
     set FC = "ifort"
     set FFLAGS = "-g -traceback"
+else if ( $compiler == "ifx" ) then
+    set FC = "ifx"
+    set FFLAGS = "-g -traceback"
 else
     echo "UNKNOWN compiler = $compiler"
     echo "USING GNU95 compiler instead"
@@ -39,10 +42,17 @@ if ( $todo == "clean" ) then
 else if ( $todo == "build" ) then
 
     $FC -c $FFLAGS str2arr2str.f90
-    f2py -c splat.F -m splat --fcompiler=$compiler
-    f2py -c str2arr2str.f90 -m str2arr2str --fcompiler=$compiler
-    f2py -m bkerror -h bkerror.pyf bkerror.f90
-    f2py -c --fcompiler=$FC bkerror.pyf bkerror.f90 str2arr2str.o
+    if ( $compiler == "ifx" ) then
+        f2py -c splat.F -m splat --f90exec=ifx --f77exec=ifx
+        f2py -c str2arr2str.f90 -m str2arr2str --f90exec=ifx --f77exec=ifx
+        f2py -m bkerror -h bkerror.pyf bkerror.f90
+        f2py -c --f90exec=ifx --f77exec=ifx bkerror.pyf bkerror.f90 str2arr2str.o
+    else
+        f2py -c splat.F -m splat --fcompiler=$compiler
+        f2py -c str2arr2str.f90 -m str2arr2str --fcompiler=$compiler
+        f2py -m bkerror -h bkerror.pyf bkerror.f90
+        f2py -c --fcompiler=$compiler bkerror.pyf bkerror.f90 str2arr2str.o
+    endif
 
 else if ( $todo == "test" ) then
 
