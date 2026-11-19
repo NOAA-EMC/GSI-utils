@@ -101,6 +101,7 @@ jobs:
           spack env activate gsiutils-env
           spack compiler find /opt/intel/oneapi/compiler/2023.2.1/linux/bin
           spack compiler find
+          spack compilers
           spack external find
           spack concretize
           export SPACK_NO_PARALLEL_MAKE=1
