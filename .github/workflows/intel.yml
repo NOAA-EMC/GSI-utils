@@ -91,9 +91,15 @@ jobs:
           git -C spack submodule update --init --recursive
           sed -i 's/^  extensions:/  #extensions:/g' spack/etc/spack/defaults/base/config.yaml
           sed -i 's/^  - ${SPACK_STACK_DIR}/  #- ${SPACK_STACK_DIR}/g' spack/etc/spack/defaults/base/config.yaml
+          sed -i 's/#builtin:/builtin:/g' spack/etc/spack/defaults/base/repos.yaml
+          sed -i 's/#  git: https/  git: https/g' spack/etc/spack/defaults/base/repos.yaml
+          sed -i 's/#  branch: /  branch: /g' spack/etc/spack/defaults/base/repos.yaml
+          sed -i 's/builtin: ${SPACK_STACK_DIR}/#builtin: ${SPACK_STACK_DIR}/g' spack/etc/spack/defaults/base/repos.yaml
+          sed -i 's/spack_stack: ${SPACK_STACK_DIR}/#spack_stack: ${SPACK_STACK_DIR}/g' spack/etc/spack/defaults/base/repos.yaml
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env gsi-utils/ci/spack_intel.yaml
           spack env activate gsiutils-env
+          spack compiler find /opt/intel/oneapi/compiler/2023.2.1/linux/bin
           spack compiler find
           spack external find
           spack concretize
