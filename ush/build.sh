@@ -8,7 +8,7 @@ readonly DIR_ROOT=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )/.."
 # User Options
 BUILD_TYPE=${BUILD_TYPE:-"Release"}
 CMAKE_OPTS=${CMAKE_OPTS:-}
-COMPILER=${COMPILER:-"intel"}
+COMPILER=${COMPILER:-"intel"}  # intel | oneapi | gnu
 BUILD_DIR=${BUILD_DIR:-"${DIR_ROOT}/build"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"${DIR_ROOT}/install"}
 UTIL_OPTS=${UTIL_OPTS:-"-DBUILD_UTIL_ALL=ON"} # By default build all GFS utilities
@@ -17,6 +17,11 @@ UTIL_OPTS=${UTIL_OPTS:-"-DBUILD_UTIL_ALL=ON"} # By default build all GFS utiliti
 
 # Detect machine (sets MACHINE_ID)
 source $DIR_ROOT/ush/detect_machine.sh
+
+# Use oneAPI by default for Nimbus
+if [[ ${MACHINE_ID} == "nimbus" && ${COMPILER} == "intel" ]]; then
+  export COMPILER="oneapi"
+fi
 
 # Load modules
 source $DIR_ROOT/ush/module-setup.sh
