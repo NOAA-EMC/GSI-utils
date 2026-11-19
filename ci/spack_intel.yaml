@@ -24,7 +24,7 @@ spack:
   - crtm@2.4.0.1
   - ncio@1.1.2
   - gsi-ncdiag@1.1.2
-  - intel-oneapi-mpi@2021.10.0
+  - intel-oneapi-mpi
   view: true
   concretizer:
     unify: true
