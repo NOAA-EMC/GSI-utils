@@ -75,7 +75,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-7
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-8
 
       # Compilers and MPI are pinned to matching oneAPI release
       # so icc/ifort and Intel MPI wrappers (mpiicc/mpiifort) match
@@ -151,7 +151,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-7
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-8
           fail-on-cache-miss: true
 
       - name: build
