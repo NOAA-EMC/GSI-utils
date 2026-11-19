@@ -7,8 +7,6 @@ spack:
     all:
       providers:
         mpi: [intel-oneapi-mpi]
-      require:
-        - "%intel@2021.10.0"
   specs:
   - netcdf-c@4.9.2 ~blosc build_system=cmake
   - netcdf-fortran@4.6.1
