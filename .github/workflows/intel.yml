@@ -94,7 +94,8 @@ jobs:
           spack compiler find
           spack external find
           spack concretize
-          spack install --fail-fast --dirty
+          export SPACK_NO_PARALLEL_MAKE=1
+          spack install --fail-fast --dirty -j1
           spack clean -a
 
   gsi-utils:
