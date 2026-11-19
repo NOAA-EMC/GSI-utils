@@ -7,6 +7,8 @@ spack:
     all:
       providers:
         mpi: [intel-oneapi-mpi]
+      compiler:
+        - intel
   specs:
   - netcdf-c@4.9.2 ~blosc build_system=cmake
   - netcdf-fortran@4.6.1
@@ -22,7 +24,7 @@ spack:
   - crtm@2.4.0.1
   - ncio@1.1.2
   - gsi-ncdiag@1.1.2
-  - intel-oneapi-mpi
+  - intel-oneapi-mpi@2021.10.0
   view: true
   concretizer:
     unify: true

@@ -15,7 +15,12 @@ env:
   CXX: icpc
   I_MPI_CC: icc
   I_MPI_F90: ifort
-  SPACK_STACK_DIR: ${{ github.workspace }}/spack
+  # Spack must come from upstream at a fixed release, not JCSDA/spack
+  # JCSDA/spack's default branch is now spack-stack-only and refers to ${SPACK_STACK_DIR}
+  # v0.23 is the last release supporting classic intel (icc/ifort) compiler
+  SPACK_REPO: https://github.com/spack/spack.git
+  SPACK_REF: releases/v0.23
+  SPACK_ENV_FILE: ci/spack_intel.yaml
 
 # A note on flushing Action cache and relevance to "cache_key" above.
 # There is no way to flush the Action cache, and hence a number (#) is appended
@@ -34,7 +39,8 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    # Pinned: icc/ifort 2023.2 are not tested against glibc/GCC of ubuntu 24.04
+    runs-on: ubuntu-22.04
 
     steps:
       # Free up disk space
@@ -53,11 +59,12 @@ jobs:
           if [[ ! -z "${DOCKER_IMGS}" ]]; then docker rmi ${DOCKER_IMGS}; fi
           df -h
 
-      - name: checkout # This is for getting spack.yml
-        if: steps.cache-env.outputs.cache-hit != 'true'
+      # Checkout to get spack environment file
+      # Must always run: hashFiles() in cache key below needs it
+      - name: checkout
         uses: actions/checkout@v4
         with:
-            path: gsi-utils
+          path: gsi-utils
 
       # Cache spack, compiler and dependencies
       - name: cache-env
@@ -68,15 +75,23 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-6
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-7
 
+      # Compilers and MPI are pinned to matching oneAPI release
+      # so icc/ifort and Intel MPI wrappers (mpiicc/mpiifort) match
       - name: install-intel-compilers
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
-          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
           sudo apt-get update
-          sudo apt-get install intel-oneapi-dev-utilities intel-oneapi-mpi-devel intel-oneapi-openmp intel-oneapi-compiler-fortran-2023.2.1 intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-2023.2.1
+          sudo apt-get install -y \
+            intel-oneapi-dev-utilities-2021.10.0 \
+            intel-oneapi-mpi-devel-2021.10.0 \
+            intel-oneapi-openmp-2023.2.1 \
+            intel-oneapi-compiler-fortran-2023.2.1 \
+            intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-2023.2.1
           sudo apt-get clean
           echo "source /opt/intel/oneapi/setvars.sh" >> ~/.bash_profile
 
@@ -85,24 +100,26 @@ jobs:
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
           sudo mv /usr/local/ /usr_local_mv
-          sudo apt-get install cmake
+          sudo apt-get install -y cmake
           rm -rf spack
-          git clone --recursive -c feature.manyFiles=true https://github.com/JCSDA/spack.git
-          git -C spack submodule update --init --recursive
-          sed -i 's/^  extensions:/  #extensions:/g' spack/etc/spack/defaults/base/config.yaml
-          sed -i 's/^  - ${SPACK_STACK_DIR}/  #- ${SPACK_STACK_DIR}/g' spack/etc/spack/defaults/base/config.yaml
-          sed -i 's/#builtin:/builtin:/g' spack/etc/spack/defaults/base/repos.yaml
-          sed -i 's/#  git: https/  git: https/g' spack/etc/spack/defaults/base/repos.yaml
-          sed -i 's/#  branch: /  branch: /g' spack/etc/spack/defaults/base/repos.yaml
-          sed -i 's/builtin: ${SPACK_STACK_DIR}/#builtin: ${SPACK_STACK_DIR}/g' spack/etc/spack/defaults/base/repos.yaml
-          sed -i 's/spack_stack: ${SPACK_STACK_DIR}/#spack_stack: ${SPACK_STACK_DIR}/g' spack/etc/spack/defaults/base/repos.yaml
+          git clone -c feature.manyFiles=true --depth 1 --branch "${SPACK_REF}" "${SPACK_REPO}" spack
           source spack/share/spack/setup-env.sh
-          spack env create gsiutils-env gsi-utils/ci/spack_intel.yaml
+          spack env create gsiutils-env gsi-utils/${SPACK_ENV_FILE}
           spack env activate gsiutils-env
-          spack compiler find /opt/intel/oneapi/compiler/2023.2.1/linux/bin
           spack compiler find
           spack compilers
           spack external find
+          # Register apt-installed intel-oneapi-mpi as external so Spack uses it
+          # instead of building its own, ensuring MPI matches what GSI-utils build uses
+          cat > intel-mpi-external.yaml <<'EOF'
+          packages:
+            intel-oneapi-mpi:
+              externals:
+              - spec: intel-oneapi-mpi@2021.10.0
+                prefix: /opt/intel/oneapi
+              buildable: false
+          EOF
+          spack config add -f intel-mpi-external.yaml
           spack concretize
           export SPACK_NO_PARALLEL_MAKE=1
           spack install --fail-fast --dirty -j1
@@ -110,7 +127,7 @@ jobs:
 
   gsi-utils:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: install-intel
@@ -120,17 +137,19 @@ jobs:
       - name: checkout-gsiutils
         uses: actions/checkout@v4
         with:
-            path: gsi-utils
+          path: gsi-utils
 
+      # Restore cache from setup job (key must match exactly)
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-6
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-7
+          fail-on-cache-miss: true
 
       - name: build
         run: |
