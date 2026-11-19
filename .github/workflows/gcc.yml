@@ -62,7 +62,7 @@ jobs:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}-1
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}-2
 
       # Install dependencies using Spack
       - name: install-dependencies-with-spack
@@ -70,7 +70,7 @@ jobs:
         run: |
           rm -rf spack
           git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
-          bash spack/REMOVE_SPACK_STACK_MODS_FOR_CI.sh
+          (cd spack && bash REMOVE_SPACK_STACK_MODS_FOR_CI.sh)
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env gsi-utils/ci/spack_gcc.yaml
           spack env activate gsiutils-env
@@ -97,7 +97,7 @@ jobs:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}-1
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}-2
 
       - name: build
         run: |

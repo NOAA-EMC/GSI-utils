@@ -67,7 +67,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-2
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-3
 
       - name: install-intel-compilers
         if: steps.cache-env.outputs.cache-hit != 'true'
@@ -88,7 +88,7 @@ jobs:
           sudo apt-get install cmake
           rm -rf spack
           git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
-          bash spack/REMOVE_SPACK_STACK_MODS_FOR_CI.sh
+          (cd spack && bash REMOVE_SPACK_STACK_MODS_FOR_CI.sh)
           source spack/share/spack/setup-env.sh
           spack env create gsiutils-env gsi-utils/ci/spack_intel.yaml
           spack env activate gsiutils-env
@@ -120,7 +120,7 @@ jobs:
             spack
             ~/.spack
             /opt/intel
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-2
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_intel.yaml') }}-3
 
       - name: build
         run: |
