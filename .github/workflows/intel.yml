@@ -157,13 +157,18 @@ jobs:
       - name: build
         run: |
           sudo mv /usr/local/ /usr_local_mv
-          sudo apt-get install cmake libblas-dev liblapack-dev
-          export SPACK_STACK_DIR=${SPACK_STACK_DIR:-$PWD/spack}
+          sudo apt-get install -y cmake libblas-dev liblapack-dev
           source spack/share/spack/setup-env.sh
-          spack env activate gsiutils-env
+          # Activate WITHOUT the view to avoid Fortran module conflicts
+          # (e.g., sp/ip with different precisions having conflicting .mod files)
+          spack env activate --without-view gsiutils-env
+          # Build CMAKE_PREFIX_PATH from individual package install prefixes
+          PREFIXES=$(spack find --format '{prefix}' | grep '/spack/opt/spack/' | sort -u | paste -sd';' -)
+          echo "CMAKE_PREFIX_PATH entries:"; echo "${PREFIXES}" | tr ';' '\n'
           cd gsi-utils
           mkdir -p build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON ..
+          cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON \
+                -DCMAKE_PREFIX_PATH="${PREFIXES}" ..
           make -j2 VERBOSE=1
           make install
         env:
