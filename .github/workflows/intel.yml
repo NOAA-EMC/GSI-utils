@@ -101,6 +101,23 @@ jobs:
         run: |
           sudo mv /usr/local/ /usr_local_mv
           sudo apt-get install -y cmake
+          # Wrap cmake to inject MPI_<lang>_COMPILER for FindMPI
+          # HDF5 and NCEP libs with +mpi need this to find Intel MPI in Spack builds
+          sudo mv /usr/bin/cmake /usr/bin/cmake.real
+          sudo tee /usr/bin/cmake > /dev/null <<'WRAP'
+          #!/bin/bash
+          MPIBIN=/opt/intel/oneapi/mpi/2021.10.0/bin
+          if [[ "$1" == "-G" ]]; then
+            exec /usr/bin/cmake.real "$1" "$2" \
+              -DMPI_C_COMPILER=${MPIBIN}/mpiicc \
+              -DMPI_CXX_COMPILER=${MPIBIN}/mpiicpc \
+              -DMPI_Fortran_COMPILER=${MPIBIN}/mpiifort \
+              "${@:3}"
+          fi
+          exec /usr/bin/cmake.real "$@"
+          WRAP
+          sudo chmod +x /usr/bin/cmake
+          cmake --version
           rm -rf spack
           git clone -c feature.manyFiles=true --depth 1 --branch "${SPACK_REF}" "${SPACK_REPO}" spack
           source spack/share/spack/setup-env.sh
