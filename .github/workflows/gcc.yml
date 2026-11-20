@@ -119,6 +119,8 @@ jobs:
           # Activate WITHOUT the view to avoid Fortran module conflicts
           # (e.g., sp/ip with different precisions having conflicting .mod files)
           spack env activate --without-view gsiutils-env
+          # Explicitly load MPI to get mpicc/mpif90 in PATH
+          spack load mpich
           # Build CMAKE_PREFIX_PATH from individual package install prefixes
           PREFIXES=$(spack find --format '{prefix}' | grep '/spack/opt/spack/' | sort -u | paste -sd';' -)
           echo "CMAKE_PREFIX_PATH entries:"; echo "${PREFIXES}" | tr ';' '\n'
