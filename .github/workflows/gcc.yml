@@ -35,7 +35,8 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    # Pinned: Spack v0.23 requires Python < 3.13 (ubuntu-22.04 has Python 3.10)
+    runs-on: ubuntu-22.04
 
     steps:
       # Free up disk space
@@ -91,7 +92,7 @@ jobs:
 
   gsi-utils:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: checkout-gsiutils
