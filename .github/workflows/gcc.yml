@@ -12,6 +12,11 @@ env:
   CC: gcc-13
   FC: gfortran-13
   CXX: g++-13
+  # Spack must come from upstream at a fixed release, not JCSDA/spack
+  # JCSDA/spack's default branch is now spack-stack-only and refers to ${SPACK_STACK_DIR}
+  SPACK_REPO: https://github.com/spack/spack.git
+  SPACK_REF: releases/v0.23
+  SPACK_ENV_FILE: ci/spack_gcc.yaml
 
 # A note on flushing Action cache and relevance to "cache_key" above.
 # There is no way to flush the Action cache, and hence a number (#) is appended
@@ -30,7 +35,8 @@ env:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    # Pinned: Spack v0.23 requires Python < 3.13 (ubuntu-22.04 has Python 3.10)
+    runs-on: ubuntu-22.04
 
     steps:
       # Free up disk space
@@ -48,11 +54,12 @@ jobs:
           if [[ ! -z "${DOCKER_IMGS}" ]]; then docker rmi ${DOCKER_IMGS}; fi
           df -h
 
-      - name: checkout  # This is for getting spack.yml
-        if: steps.cache-env.outputs.cache-hit != 'true'
+      # Checkout to get spack environment file
+      # Must always run: hashFiles() in cache key below needs it
+      - name: checkout
         uses: actions/checkout@v4
         with:
-            path: gsi-utils
+          path: gsi-utils
 
       # Cache spack, compiler and dependencies
       - name: cache-env
@@ -62,52 +69,65 @@ jobs:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}-2
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-3
 
       # Install dependencies using Spack
       - name: install-dependencies-with-spack
         if: steps.cache-env.outputs.cache-hit != 'true'
         run: |
           sudo mv /usr/local/ /usr_local_mv
-          sudo apt-get install cmake
+          sudo apt-get install -y cmake
           rm -rf spack
-          git clone -c feature.manyFiles=true https://github.com/JCSDA/spack.git
-          (cd spack && bash REMOVE_SPACK_STACK_MODS_FOR_CI.sh)
+          git clone -c feature.manyFiles=true --depth 1 --branch "${SPACK_REF}" "${SPACK_REPO}" spack
           source spack/share/spack/setup-env.sh
-          spack env create gsiutils-env gsi-utils/ci/spack_gcc.yaml
+          spack env create gsiutils-env gsi-utils/${SPACK_ENV_FILE}
           spack env activate gsiutils-env
           spack compiler find
+          spack compilers
           spack external find
           spack concretize
-          spack install --fail-fast --dirty
+          export SPACK_NO_PARALLEL_MAKE=1
+          spack install --fail-fast --dirty -j1
           spack clean -a
 
   gsi-utils:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: checkout
+      - name: checkout-gsiutils
         uses: actions/checkout@v4
         with:
-            path: gsi-utils
+          path: gsi-utils
 
+      # Restore cache from setup job (key must match exactly)
       - name: cache-env
         id: cache-env
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             spack
             ~/.spack
-          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles('gsi-utils/ci/spack_gcc.yaml') }}-2
+          key: spack-${{ runner.os }}-${{ env.cache_key }}-${{ hashFiles(format('gsi-utils/{0}', env.SPACK_ENV_FILE)) }}-3
+          fail-on-cache-miss: true
 
       - name: build
         run: |
+          sudo mv /usr/local/ /usr_local_mv
+          sudo apt-get install -y cmake libblas-dev liblapack-dev
           source spack/share/spack/setup-env.sh
-          spack env activate gsiutils-env
+          # Activate WITHOUT the view to avoid Fortran module conflicts
+          # (e.g., sp/ip with different precisions having conflicting .mod files)
+          spack env activate --without-view gsiutils-env
+          # Explicitly load MPI to get mpicc/mpif90 in PATH
+          spack load mpich
+          # Build CMAKE_PREFIX_PATH from individual package install prefixes
+          PREFIXES=$(spack find --format '{prefix}' | grep '/spack/opt/spack/' | sort -u | paste -sd';' -)
+          echo "CMAKE_PREFIX_PATH entries:"; echo "${PREFIXES}" | tr ';' '\n'
           cd gsi-utils
           mkdir -p build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON ..
+          cmake -DCMAKE_INSTALL_PREFIX=../install -DBUILD_UTIL_ALL=ON \
+                -DCMAKE_PREFIX_PATH="${PREFIXES}" ..
           make -j2 VERBOSE=1
           make install
         env:
